@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Onco-Navigator AI - Bridging India's Cancer Care Gap{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/static/medical-theme.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div class="brand">
+          <div class="brand-logo">ON</div>
+          <div>
+            <div class="brand-title">Onco-Navigator AI</div>
+            <div class="brand-subtitle">Unified Platform for Bridging India's Cancer Care Gap</div>
+          </div>
+        </div>
+        <nav class="nav-links">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/pcp" class="nav-link">PCP Triage</a>
+          <a href="/oncologist" class="nav-link">Oncologist Hub</a>
+          <a href="/patient" class="nav-link nav-link-patient">Patient App</a>
+          <button id="emergency-button" class="nav-link nav-link-primary emergency-button">🚨 Emergency</button>
+        </nav>
+      </div>
+    </header>
+    <main class="app-main">
+      <div class="page-shell">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+    <footer class="app-footer">
+      <div class="app-footer-inner">
+        <div>
+          Onco-Navigator AI
+        </div>
+        <div>
+          AI-powered triage, tele-oncology navigation, and patient symptom monitoring
+        </div>
+        <div>
+          Emergency Contact: 24/7 Oncology Hotline - 1-800-CANCER
+        </div>
+        <div>
+          Developed by Nihan | GitHub: nihannihu | LinkedIn: nihan-nihu
+        </div>
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Emergency Modal -->
+  <div id="emergency-modal" class="emergency-modal">
+    <div class="emergency-modal-content">
+      <span class="emergency-close">&times;</span>
+      <h2 class="emergency-title">🚨 Emergency Assistance</h2>
+      <div id="emergency-content">
+        <p class="emergency-text">Locating your position and finding the nearest hospital...</p>
+        <div class="emergency-loader"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Emergency button functionality
+    document.getElementById('emergency-button').addEventListener('click', function() {
+      const modal = document.getElementById('emergency-modal');
+      const content = document.getElementById('emergency-content');
+      modal.style.display = 'block';
+      
+      // Reset content
+      content.innerHTML = '<p class="emergency-text">Locating your position and finding the nearest hospital...</p><div class="emergency-loader"></div>';
+      
+      // Check if geolocation is supported
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Send location to backend to find nearest hospitals
+            fetch('/emergency-hospitals', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                latitude: lat,
+                longitude: lon
+              })
+            })
+            .then(response => response.json())
+            .then(data => {
+              displayHospitals(data);
+            })
+            .catch(error => {
+              content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
+              console.error('Error:', error);
+            });
+          },
+          function(error) {
+            content.innerHTML = '<p class="emergency-error">Unable to get your location. Please call 1-800-CANCER immediately.</p>';
+            console.error('Geolocation error:', error);
+          }
+        );
+      } else {
+        content.innerHTML = '<p class="emergency-error">Geolocation is not supported by your browser. Please call 1-800-CANCER immediately.</p>';
+      }
+    });
+    
+    // Close modal
+    document.querySelector('.emergency-close').addEventListener('click', function() {
+      document.getElementById('emergency-modal').style.display = 'none';
+    });
+    
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('emergency-modal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    });
+    
+    // Display hospitals in the modal
+    function displayHospitals(data) {
+      const content = document.getElementById('emergency-content');
+      if (data.hospitals && data.hospitals.length > 0) {
+        let html = '<div class="hospital-list">';
+        data.hospitals.forEach(hospital => {
+          html += `
+            <div class="hospital-card">
+              <h3>${hospital.name}</h3>
+              <p><strong>Distance:</strong> ${hospital.distance} km</p>
+              <p><strong>Estimated Time:</strong> ${hospital.estimated_time} minutes</p>
+              <p><strong>Address:</strong> ${hospital.address}</p>
+              <p><strong>Phone:</strong> ${hospital.phone}</p>
+              <p><strong>Specialist:</strong> ${hospital.specialist_name} - Cancer Specialist</p>
+            </div>
+          `;
+        });
+        html += '</div>';
+        content.innerHTML = html;
+      } else {
+        content.innerHTML = '<p class="emergency-error">No hospitals found nearby. Please call 1-800-CANCER immediately.</p>';
+      }
+    }
+  </script>
+</body>
+</html>
