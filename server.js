@@ -14,6 +14,11 @@ app.use(express.static('static'));
 // Serve HTML templates
 app.use('/templates', express.static(path.join(__dirname, 'templates')));
 
+// Root route - serve the index.html from templates
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'Frontend server is running' });
