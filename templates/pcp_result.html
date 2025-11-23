@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}PCP Result - Onco-Navigator AI{% endblock %}
+{% block title %}AI Triage Result - Onco-Navigator AI{% endblock %}
 {% block content %}
 <div class="page-grid">
   <section class="surface-panel fade-in-up">
@@ -22,6 +22,15 @@
           {% endif %}
         </p>
         <p><strong>Risk Score:</strong> {{ '%.3f'|format(risk_score) }}</p>
+        <p><strong>Simulated Cancer Stage:</strong> 
+          {% if risk_score >= 0.8 %}
+          <span class="badge badge-high">Stage III-IV</span>
+          {% elif risk_score >= 0.5 %}
+          <span class="badge badge-medium">Stage I-II</span>
+          {% else %}
+          <span class="badge badge-low">Stage 0</span>
+          {% endif %}
+        </p>
         <p><strong>Case ID:</strong> {{ case_id }}</p>
         <p><strong>Status:</strong> <span class="badge">Forwarded to Oncologist Queue</span></p>
       </div>
@@ -30,7 +39,9 @@
     {% if image_url %}
     <div class="case-image">
       <h3 class="surface-title">Uploaded Scan Preview</h3>
-      <img src="{{ image_url }}" alt="Uploaded mammogram" class="case-image-preview" />
+      <div class="case-image-container">
+        <img src="{{ image_url }}" alt="Uploaded mammogram" class="case-image-preview" />
+      </div>
     </div>
     {% endif %}
     
@@ -59,6 +70,17 @@
           <span class="badge badge-high">MALIGNANT (≥0.5)</span> - Higher likelihood of malignancy<br>
           <span class="badge badge-low">BENIGN (&lt;0.5)</span> - Lower likelihood of malignancy<br><br>
           Risk Score Range: 0.000 (Benign) to 1.000 (Malignant)
+        </p>
+      </article>
+      
+      <article class="pillar-card">
+        <div class="pillar-label">Simulated Staging</div>
+        <h3 class="pillar-title">Cancer Stage Estimation</h3>
+        <p class="pillar-body">
+          <span class="badge badge-high">Stage III-IV (≥0.8)</span> - Advanced disease<br>
+          <span class="badge badge-medium">Stage I-II (0.5-0.79)</span> - Early-mid stage<br>
+          <span class="badge badge-low">Stage 0 (&lt;0.5)</span> - Non-invasive/early<br><br>
+          <em>Note: This is a simulated staging for demonstration purposes only.</em>
         </p>
       </article>
     </div>

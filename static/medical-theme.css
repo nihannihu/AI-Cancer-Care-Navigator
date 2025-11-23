@@ -254,55 +254,72 @@ p {
   margin-bottom: 1rem;
 }
 
-/* Buttons */
+/* Buttons - Enhanced */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem; /* Increased padding for larger buttons */
   border-radius: var(--medical-radius-lg);
   border: 1px solid transparent;
   background: linear-gradient(135deg, var(--medical-primary), var(--medical-primary-dark));
   color: white;
-  font-size: 0.95rem;
+  font-size: 1.1rem; /* Larger font size */
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  transition: all var(--medical-transition);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); /* Enhanced shadow */
+  transition: all var(--medical-transition-slow); /* Slower transition for smoother effect */
   font-family: var(--medical-font);
   position: relative;
   overflow: hidden;
-  min-width: 150px;
+  min-width: 180px; /* Increased minimum width */
   text-align: center;
 }
 
 .btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+  transform: translateY(-3px); /* Increased lift effect */
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5); /* Enhanced shadow on hover */
+}
+
+.btn:active {
+  transform: translateY(-1px); /* Subtle press effect */
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
 }
 
 .btn-secondary {
   background: linear-gradient(135deg, var(--medical-bg-light), var(--medical-surface));
   color: var(--medical-text-primary);
   border: 1px solid var(--medical-border-strong);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .btn-secondary:hover {
   background: linear-gradient(135deg, var(--medical-surface), var(--medical-bg-light));
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .btn-danger {
   background: linear-gradient(135deg, var(--medical-danger), #dc2626);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
 }
 
 .btn-danger:hover {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
+}
+
+/* Add btn-primary class */
+.btn-primary {
+  background: linear-gradient(135deg, var(--medical-primary), var(--medical-primary-dark));
+  color: white;
+  border: none;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--medical-primary-dark), var(--medical-secondary));
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.5);
 }
 
 /* Badges */
@@ -319,6 +336,12 @@ p {
   color: var(--medical-text-secondary);
   transition: all var(--medical-transition);
   letter-spacing: 0.05em;
+}
+
+.badge-medium {
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.4);
 }
 
 .badge-high {
@@ -400,17 +423,19 @@ label {
 }
 
 input[type="text"],
+input[type="email"],
 input[type="number"],
 input[type="file"],
-input[type="range"] {
+input[type="range"],
+input[type="tel"] {
   margin-top: 0.25rem;
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: var(--medical-radius-md);
+  padding: 1rem; /* Increased padding */
+  border-radius: 8px; /* More rounded corners */
   border: 1px solid var(--medical-border);
   background: rgba(15, 23, 42, 0.8);
   color: var(--medical-text-primary);
-  font-size: 1rem;
+  font-size: 1.1rem; /* Larger font size */
   transition: all var(--medical-transition);
 }
 
@@ -568,22 +593,26 @@ input[type="range"] {
   box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
 }
 
-/* Case Image Preview */
-.case-image {
-  margin-top: 2rem;
-}
-
+/* Case Image Preview - Consistent small size for all previews */
 .case-image-preview {
   max-width: 100%;
-  max-height: 400px;
+  max-height: 200px;
   width: auto;
   height: auto;
   border-radius: var(--medical-radius-md);
   border: 1px solid var(--medical-border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  display: block;
-  margin: 0 auto;
   object-fit: contain;
+  margin: 0.5rem 0;
+}
+
+.case-image-container {
+  display: flex;
+  justify-content: center;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: var(--medical-radius-md);
+  border: 1px solid var(--medical-border);
 }
 
 /* Emergency Button */
@@ -766,6 +795,171 @@ input[type="range"] {
   line-height: 1.7;
 }
 
+/* AI Diagnostics Styles */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--medical-border);
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: var(--medical-text-muted);
+  border-bottom: 3px solid transparent;
+  transition: all var(--medical-transition);
+}
+
+.tab-btn:hover {
+  color: var(--medical-text-primary);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.tab-btn.active {
+  color: var(--medical-primary);
+  border-bottom: 3px solid var(--medical-primary);
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.upload-form {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: var(--medical-radius-md);
+  padding: 1.5rem;
+  border: 1px solid var(--medical-border);
+  margin-bottom: 1.5rem;
+}
+
+.upload-form input[type="file"] {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.sub-section {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: var(--medical-radius-md);
+  padding: 1.5rem;
+  border: 1px solid var(--medical-border);
+  margin-bottom: 1.5rem;
+}
+
+.sub-section h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: var(--medical-text-primary);
+}
+
+.prediction-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.prediction-form label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  color: var(--medical-text-secondary);
+}
+
+.prediction-form input {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--medical-radius-sm);
+  border: 1px solid var(--medical-border);
+  background: rgba(15, 23, 42, 0.8);
+  color: var(--medical-text-primary);
+}
+
+.voice-controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.transcription-box {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: var(--medical-radius-md);
+  padding: 1rem;
+  border: 1px solid var(--medical-border);
+  margin-bottom: 1.5rem;
+}
+
+.transcription-box h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  color: var(--medical-text-primary);
+}
+
+.transcription-box p {
+  margin: 0;
+  color: var(--medical-text-secondary);
+  font-style: italic;
+}
+
+.result-box {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: var(--medical-radius-md);
+  padding: 1.5rem;
+  border: 1px solid var(--medical-border);
+  margin-top: 1rem;
+}
+
+.result-box.hidden {
+  display: none;
+}
+
+.metric-card {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: var(--medical-radius-md);
+  padding: 1rem;
+  border: 1px solid var(--medical-border);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--medical-primary);
+  margin-bottom: 0.25rem;
+}
+
+.metric-label {
+  font-size: 0.9rem;
+  color: var(--medical-text-secondary);
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.result-table th,
+.result-table td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--medical-border);
+}
+
+.result-table th {
+  background: rgba(15, 23, 42, 0.95);
+  color: var(--medical-text-primary);
+  font-weight: 600;
+}
+
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
@@ -823,5 +1017,88 @@ input[type="range"] {
     width: 95%;
     margin: 10% auto;
     padding: 1.5rem;
+  }
+}
+
+/* Additional responsive improvements for better mobile experience */
+@media (max-width: 900px) {
+  .page-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  
+  .app-header-inner {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .brand {
+    justify-content: center;
+  }
+  
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .app-footer-inner {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  /* Form improvements */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Table improvements */
+  table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  th,
+  td {
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header-inner {
+    padding: 0.75rem;
+  }
+  
+  .brand-title {
+    font-size: 1.1rem;
+  }
+  
+  .brand-subtitle {
+    font-size: 0.65rem;
+  }
+  
+  .nav-link {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  .surface-panel {
+    padding: 1rem;
+  }
+  
+  .surface-title {
+    font-size: 1.3rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
   }
 }

@@ -27,7 +27,9 @@
             <th>Case ID</th>
             <th>Patient Name</th>
             <th>Image</th>
+            <th>Medical Analysis</th>
             <th>Risk Assessment</th>
+            <th>Simulated Stage</th>
             <th>Risk Score</th>
             <th>Status</th>
             <th>Actions</th>
@@ -48,10 +50,37 @@
               {% endif %}
             </td>
             <td>
+              {% if c.medical_analysis %}
+                {% if c.medical_analysis.detected_condition %}
+                <div>
+                  <strong>{{ c.medical_analysis.detected_condition }}</strong><br>
+                  <span class="badge badge-high">{{ c.medical_analysis.severity }}</span><br>
+                  <small>Confidence: {{ (c.medical_analysis.confidence_score * 100)|int }}%</small>
+                </div>
+                {% else %}
+                <div>
+                  <span class="badge badge-medium">Non-Medical Image</span><br>
+                  <small>{{ c.medical_analysis.note }}</small>
+                </div>
+                {% endif %}
+              {% else %}
+              <span class="surface-body" style="font-size:0.8rem;">Not analyzed</span>
+              {% endif %}
+            </td>
+            <td>
               {% if c.risk_label == 'MALIGNANT' %}
               <span class="badge badge-high">{{ c.risk_label }}</span>
               {% else %}
               <span class="badge badge-low">{{ c.risk_label }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if c.risk_score >= 0.8 %}
+              <span class="badge badge-high">Stage III-IV</span>
+              {% elif c.risk_score >= 0.5 %}
+              <span class="badge badge-medium">Stage I-II</span>
+              {% else %}
+              <span class="badge badge-low">Stage 0</span>
               {% endif %}
             </td>
             <td>
@@ -109,8 +138,10 @@
         <p class="pillar-body">
           1. Examine the uploaded mammogram<br>
           2. Review the AI risk assessment<br>
-          3. Mark as "Reviewed" to acknowledge<br>
-          4. Assign to a nurse navigator for coordination
+          3. Check medical analysis findings<br>
+          4. Consider simulated staging information<br>
+          5. Mark as "Reviewed" to acknowledge<br>
+          6. Assign to a nurse navigator for coordination
         </p>
       </article>
       
@@ -121,6 +152,17 @@
           <span class="badge badge-high">High Risk (≥0.8)</span> - Immediate attention required<br>
           <span class="badge">Moderate Risk (0.5-0.79)</span> - Standard review process<br>
           <span class="badge badge-low">Low Risk (≤0.49)</span> - Routine monitoring
+        </p>
+      </article>
+      
+      <article class="pillar-card">
+        <div class="pillar-label">Simulated Staging</div>
+        <h3 class="pillar-title">Stage Estimation</h3>
+        <p class="pillar-body">
+          <span class="badge badge-high">Stage III-IV (≥0.8)</span> - Advanced disease<br>
+          <span class="badge badge-medium">Stage I-II (0.5-0.79)</span> - Early-mid stage<br>
+          <span class="badge badge-low">Stage 0 (&lt;0.5)</span> - Non-invasive/early<br><br>
+          <em>Note: This is a simulated staging for demonstration purposes only.</em>
         </p>
       </article>
     </div>

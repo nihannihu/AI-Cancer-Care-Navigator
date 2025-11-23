@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>{% block title %}Onco-Navigator AI - Bridging India's Cancer Care Gap{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="/static/medical-theme.css" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://web.puter.com/puter-js/puter.min.js"></script>
 </head>
+
 <body>
   <div class="app-shell">
     <header class="app-header">
@@ -23,6 +27,7 @@
           <a href="/" class="nav-link">Home</a>
           <a href="/pcp" class="nav-link">PCP Triage</a>
           <a href="/oncologist" class="nav-link">Oncologist Hub</a>
+          <a href="/ai-diagnostics" class="nav-link">AI Diagnostics</a>
           <a href="/patient" class="nav-link nav-link-patient">Patient App</a>
           <button id="emergency-button" class="nav-link nav-link-primary emergency-button">🚨 Emergency</button>
         </nav>
@@ -50,7 +55,7 @@
       </div>
     </footer>
   </div>
-  
+
   <!-- Emergency Modal -->
   <div id="emergency-modal" class="emergency-modal">
     <div class="emergency-modal-content">
@@ -62,24 +67,24 @@
       </div>
     </div>
   </div>
-  
+
   <script>
     // Emergency button functionality
-    document.getElementById('emergency-button').addEventListener('click', function() {
+    document.getElementById('emergency-button').addEventListener('click', function () {
       const modal = document.getElementById('emergency-modal');
       const content = document.getElementById('emergency-content');
       modal.style.display = 'block';
-      
+
       // Reset content
       content.innerHTML = '<p class="emergency-text">Locating your position and finding the nearest hospital...</p><div class="emergency-loader"></div>';
-      
+
       // Check if geolocation is supported
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          function(position) {
+          function (position) {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            
+
             // Send location to backend to find nearest hospitals
             fetch('/emergency-hospitals', {
               method: 'POST',
@@ -91,16 +96,16 @@
                 longitude: lon
               })
             })
-            .then(response => response.json())
-            .then(data => {
-              displayHospitals(data);
-            })
-            .catch(error => {
-              content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
-              console.error('Error:', error);
-            });
+              .then(response => response.json())
+              .then(data => {
+                displayHospitals(data);
+              })
+              .catch(error => {
+                content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
+                console.error('Error:', error);
+              });
           },
-          function(error) {
+          function (error) {
             content.innerHTML = '<p class="emergency-error">Unable to get your location. Please call 1-800-CANCER immediately.</p>';
             console.error('Geolocation error:', error);
           }
@@ -109,20 +114,20 @@
         content.innerHTML = '<p class="emergency-error">Geolocation is not supported by your browser. Please call 1-800-CANCER immediately.</p>';
       }
     });
-    
+
     // Close modal
-    document.querySelector('.emergency-close').addEventListener('click', function() {
+    document.querySelector('.emergency-close').addEventListener('click', function () {
       document.getElementById('emergency-modal').style.display = 'none';
     });
-    
+
     // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', function (event) {
       const modal = document.getElementById('emergency-modal');
       if (event.target == modal) {
         modal.style.display = 'none';
       }
     });
-    
+
     // Display hospitals in the modal
     function displayHospitals(data) {
       const content = document.getElementById('emergency-content');
@@ -148,4 +153,5 @@
     }
   </script>
 </body>
+
 </html>

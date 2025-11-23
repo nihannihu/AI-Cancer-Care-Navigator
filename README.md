@@ -1,7 +1,7 @@
 # Onco-Navigator AI - Bridging India's Cancer Care Gap
 
 An AI-powered cancer care platform that streamlines early detection and specialist referral through three core pillars:
-1. AI-Assisted Triage for Primary Care
+1. AI-Assisted Triage for Primary Care  
 2. Tele-Oncology Hub for Specialists
 3. Patient Monitoring & Symptom Tracking
 

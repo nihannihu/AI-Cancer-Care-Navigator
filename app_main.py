@@ -15,6 +15,9 @@ import httpx
 
 from ml.model_utils import BreastCancerModel
 
+# Import patient app router
+from patient_app.router import patient_app_router
+
 ROOT = Path(__file__).resolve().parent
 TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
@@ -37,14 +40,30 @@ model = BreastCancerModel(Path(_model_path_env)) if _model_path_env else BreastC
 
 # Optional MongoDB client (mirrors data for persistence; app still works without it)
 MONGODB_URI = os.getenv("MONGODB_URI")
-mongo_client = AsyncIOMotorClient(MONGODB_URI) if MONGODB_URI else None
-db = mongo_client.get_default_database() if mongo_client is not None else None
-db_cases = db["onco_cases"] if db is not None else None
-db_symptoms = db["onco_patient_symptoms"] if db is not None else None
+try:
+    mongo_client = AsyncIOMotorClient(MONGODB_URI) if MONGODB_URI and MONGODB_URI != "mongodb://localhost:27017/onco_navigator" else None
+    db = mongo_client.get_default_database() if mongo_client is not None else None
+    db_cases = db["onco_cases"] if db is not None else None
+    db_symptoms = db["onco_patient_symptoms"] if db is not None else None
+except Exception as e:
+    print(f"Warning: Could not connect to MongoDB: {e}")
+    mongo_client = None
+    db = None
+    db_cases = None
+    db_symptoms = None
 
 # Geoapify API key
 GEOAPIFY_API_KEY = os.getenv("GEOAPIFY_API_KEY")
 
+# Get database instance for patient app
+try:
+    if db is not None:
+        from patient_app.auth import users_collection
+        # Make db available to patient_app
+        import patient_app.router
+        patient_app.router.db = db
+except Exception as e:
+    print(f"Warning: Could not setup patient app database: {e}")
 
 # In-memory storage for demo (Mongo is used as a mirror for persistence)
 class ScanCase:
@@ -85,6 +104,7 @@ async def pcp_dashboard(request: Request) -> HTMLResponse:
 async def pcp_upload(
     request: Request,
     patient_name: str = Form(...),
+    patient_email: str = Form(...),  # Add email for linking to patient
     file: UploadFile = File(...),
 ) -> HTMLResponse:
     data = await file.read()
@@ -122,14 +142,32 @@ async def pcp_upload(
             doc = {
                 "case_id": case_id,
                 "patient_name": patient_name,
+                "patient_email": patient_email,  # Store email for linking
                 "risk_label": label,
                 "risk_score": float(score),
                 "status": case.status,
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Add timestamp
             }
             if image_url:
                 doc["image_url"] = image_url
             await db_cases.insert_one(doc)
-        except Exception:
+            
+            # Also store in patient_cases collection for patient dashboard
+            try:
+                db_patient_cases = db["patient_cases"] if db is not None else None
+                if db_patient_cases is not None:
+                    await db_patient_cases.insert_one({
+                        "patient_email": patient_email,
+                        "case_id": case_id,
+                        "risk_label": label,
+                        "risk_score": float(score),
+                        "image_url": image_url,
+                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Add timestamp
+                    })
+            except Exception as e:
+                print(f"Warning: Could not store case in patient_cases collection: {e}")
+        except Exception as e:
+            print(f"Warning: Could not store case in database: {e}")
             # For this prototype we silently ignore DB errors and continue with in-memory storage
             pass
 
@@ -138,6 +176,7 @@ async def pcp_upload(
         {
             "request": request,
             "patient_name": patient_name,
+            "patient_email": patient_email,
             "risk_label": label,
             "risk_score": score,
             "case_id": case_id,
@@ -403,6 +442,84 @@ def get_mock_hospitals_near_location(user_lat, user_lon):
     mock_hospitals.sort(key=lambda x: x["distance"])
     
     return JSONResponse({"hospitals": mock_hospitals[:5]})
+
+# Include patient app routes
+app.include_router(patient_app_router, prefix="/patient")
+
+# AI Diagnostics route
+@app.get("/ai-diagnostics", response_class=HTMLResponse)
+async def ai_diagnostics_page(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse("ai_diagnostics.html", {"request": request})
+
+# AI Diagnostics API Endpoints
+from ml.image_analysis import analyze_image
+from ml.nlp_utils import analyze_report
+from ml.predictive_models import predict_survival, predict_side_effects
+import json
+
+@app.post("/api/analyze-image")
+async def api_analyze_image(file: UploadFile = File(...)) -> JSONResponse:
+    try:
+        data = await file.read()
+        result = analyze_image(data)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/analyze-report")
+async def api_analyze_report(file: UploadFile = File(...)) -> JSONResponse:
+    try:
+        data = await file.read()
+        result = analyze_report(data)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/predict-outcome")
+async def api_predict_outcome(request: Request) -> JSONResponse:
+    try:
+        body = await request.json()
+        result = predict_survival(int(body.get("age", 50)), int(body.get("stage", 1)), int(body.get("comorbidities", 0)))
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/predict-side-effects")
+async def api_predict_side_effects(request: Request) -> JSONResponse:
+    try:
+        body = await request.json()
+        result = predict_side_effects(int(body.get("age", 50)), int(body.get("chemo_type", 0)), float(body.get("dosage", 0.5)))
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/analyze-symptoms")
+async def api_analyze_symptoms(request: Request) -> JSONResponse:
+    try:
+        body = await request.json()
+        text = body.get("text", "")
+        if not text:
+            return JSONResponse({"error": "No text provided"}, status_code=400)
+        
+        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+        if not GEMINI_API_KEY or GEMINI_API_KEY == "your_gemini_api_key_here":
+            # Return mock response when API key is not configured
+            return JSONResponse({
+                "analysis": f"Mock analysis of symptoms: {text}\n\nNote: Gemini API key not configured. Please set GEMINI_API_KEY in .env file for real AI analysis."
+            })
+        
+        # Use gemini-2.5-flash model which is available
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
+        payload = {"contents": [{"parts": [{"text": f"Analyze these symptoms: {text}"}]}]}
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30.0)
+        if response.status_code != 200:
+            return JSONResponse({"error": f"API Error: {response.text}"}, status_code=response.status_code)
+        data = response.json()
+        analysis = data["candidates"][0]["content"]["parts"][0]["text"]
+        return JSONResponse({"analysis": analysis})
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 # To run: uvicorn app_main:app --reload
 if __name__ == "__main__":
