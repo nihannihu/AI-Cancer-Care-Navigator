@@ -321,10 +321,7 @@ async def emergency_hospitals(request: Request, location: dict) -> JSONResponse:
         
         # Check if Geoapify API key is available
         if not GEOAPIFY_API_KEY:
-            # Fallback to mock data if API key is missing
-            latitude = location.get("latitude", 17.4243)
-            longitude = location.get("longitude", 78.4312)
-            return get_mock_hospitals_near_location(latitude, longitude)
+            return JSONResponse({"error": "Geoapify API key not configured. Please set GEOAPIFY_API_KEY in .env file."}, status_code=500)
         
         # Use Geoapify API to find nearby hospitals
         async with httpx.AsyncClient() as client:
@@ -363,15 +360,13 @@ async def emergency_hospitals(request: Request, location: dict) -> JSONResponse:
                 # Return up to 5 nearest hospitals
                 return JSONResponse({"hospitals": hospitals[:5]})
             else:
-                # Fallback to mock data if API fails - using user's actual location
-                return get_mock_hospitals_near_location(latitude, longitude)
+                # Return error if API fails
+                return JSONResponse({"error": f"Geoapify API error: {response.status_code} - {response.text}"}, status_code=response.status_code)
         
     except Exception as e:
         print(f"Error finding hospitals: {e}")
-        # Fallback to mock data if there's an error
-        latitude = location.get("latitude", 17.4243)
-        longitude = location.get("longitude", 78.4312)
-        return get_mock_hospitals_near_location(latitude, longitude)
+        # Return error if there's an exception
+        return JSONResponse({"error": f"Failed to find hospitals: {str(e)}"}, status_code=500)
 
 
 def haversine_distance(lat1, lon1, lat2, lon2):

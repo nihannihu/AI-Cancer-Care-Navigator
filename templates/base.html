@@ -99,11 +99,16 @@
               .then(response => {
                 // Check if response is OK before parsing JSON
                 if (!response.ok) {
-                  throw new Error('Network response was not ok: ' + response.status);
+                  return response.json().then(errorData => {
+                    throw new Error(errorData.error || 'Unknown error occurred');
+                  });
                 }
                 return response.json();
               })
               .then(data => {
+                if (data.error) {
+                  throw new Error(data.error);
+                }
                 displayHospitals(data);
               })
               .catch(error => {
@@ -112,25 +117,27 @@
               });
           },
           function (error) {
-            content.innerHTML = '<p class="emergency-error">Unable to get your location. Please call 1-800-CANCER immediately.</p><p class="emergency-error">Error code: ' + error.code + ' - ' + error.message + '</p>';
+            let errorMessage = 'Unable to get your location. ';
+            switch(error.code) {
+              case error.PERMISSION_DENIED:
+                errorMessage += 'Location access denied. Please enable location services.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                errorMessage += 'Location information is unavailable.';
+                break;
+              case error.TIMEOUT:
+                errorMessage += 'The request to get your location timed out.';
+                break;
+              default:
+                errorMessage += 'An unknown error occurred.';
+                break;
+            }
+            content.innerHTML = '<p class="emergency-error">' + errorMessage + '</p><p class="emergency-error">Error code: ' + error.code + '</p>';
             console.error('Geolocation error:', error);
           }
         );
       } else {
         content.innerHTML = '<p class="emergency-error">Geolocation is not supported by your browser. Please call 1-800-CANCER immediately.</p>';
-      }
-    });
-
-    // Close modal
-    document.querySelector('.emergency-close').addEventListener('click', function () {
-      document.getElementById('emergency-modal').style.display = 'none';
-    });
-
-    // Close modal when clicking outside
-    window.addEventListener('click', function (event) {
-      const modal = document.getElementById('emergency-modal');
-      if (event.target == modal) {
-        modal.style.display = 'none';
       }
     });
 
@@ -141,15 +148,15 @@
         let html = '<div class="hospital-list">';
         data.hospitals.forEach(hospital => {
           html += `
-            <div class="hospital-card">
-              <h3>${hospital.name}</h3>
-              <p><strong>Distance:</strong> ${hospital.distance} km</p>
-              <p><strong>Estimated Time:</strong> ${hospital.estimated_time} minutes</p>
-              <p><strong>Address:</strong> ${hospital.address}</p>
-              <p><strong>Phone:</strong> ${hospital.phone}</p>
-              <p><strong>Specialist:</strong> ${hospital.specialist_name} - Cancer Specialist</p>
-            </div>
-          `;
+                <div class="hospital-card">
+                    <h3>${hospital.name}</h3>
+                    <p><strong>Distance:</strong> ${hospital.distance} km</p>
+                    <p><strong>Estimated Time:</strong> ${hospital.estimated_time} minutes</p>
+                    <p><strong>Address:</strong> ${hospital.address}</p>
+                    <p><strong>Phone:</strong> ${hospital.phone}</p>
+                    <p><strong>Specialist:</strong> ${hospital.specialist_name}</p>
+                </div>
+            `;
         });
         html += '</div>';
         content.innerHTML = html;
