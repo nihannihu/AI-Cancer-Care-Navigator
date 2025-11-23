@@ -97,6 +97,12 @@
               })
             })
               .then(response => {
+                // Check content type before parsing JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                  throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+                }
+                
                 // Check if response is OK before parsing JSON
                 if (!response.ok) {
                   return response.json().then(errorData => {

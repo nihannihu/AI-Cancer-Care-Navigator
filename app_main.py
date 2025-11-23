@@ -24,13 +24,18 @@ STATIC_DIR = ROOT / "static"
 UPLOADS_DIR = STATIC_DIR / "uploads"
 
 # Load configuration from .env if present
-load_dotenv(ROOT / ".env")
+load_dotenv(ROOT / ".env.python")  # Load the Python environment file with API keys
 
 app = FastAPI(title="Onco-Navigator AI (No React)")
 
 # Mount static files if directory exists
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+    
+    # Also mount uploads directory if it exists
+    uploads_dir = STATIC_DIR / "uploads"
+    if uploads_dir.exists():
+        app.mount("/static/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
@@ -121,8 +126,11 @@ async def pcp_upload(
     try:
         image_path.write_bytes(data)
         image_url = f"/static/uploads/{filename}"
-    except Exception:
+        print(f"Image saved to: {image_path}")
+        print(f"Image URL: {image_url}")
+    except Exception as e:
         # If saving fails, continue without a preview image
+        print(f"Error saving image: {e}")
         image_url = None
         image_path = None
 
@@ -320,51 +328,82 @@ async def emergency_hospitals(request: Request, location: dict) -> JSONResponse:
             return JSONResponse({"error": "Invalid location data"}, status_code=400)
         
         # Check if Geoapify API key is available
+        print(f"Geoapify API Key: {GEOAPIFY_API_KEY}")  # Debug output
         if not GEOAPIFY_API_KEY:
             return JSONResponse({"error": "Geoapify API key not configured. Please set GEOAPIFY_API_KEY in .env file."}, status_code=500)
         
         # Use Geoapify API to find nearby hospitals
-        async with httpx.AsyncClient() as client:
-            # Search for hospitals and medical facilities within 10km radius
-            response = await client.get(
-                f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare.clinic,healthcare&filter=circle:{longitude},{latitude},10000&limit=5&apiKey={GEOAPIFY_API_KEY}"
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                features = data.get("features", [])
+        try:
+            async with httpx.AsyncClient() as client:
+                # Search for hospitals and medical facilities within 10km radius
+                # Fixed the category to use supported healthcare categories
+                # Note: Geoapify expects longitude,latitude order
+                url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare&filter=circle:{longitude},{latitude},10000&limit=5&apiKey={GEOAPIFY_API_KEY}"
+                print(f"Requesting URL: {url}")  # Debug output
+                response = await client.get(url, timeout=30.0)
                 
-                hospitals = []
-                for feature in features:
-                    properties = feature.get("properties", {})
-                    coordinates = feature.get("geometry", {}).get("coordinates", [])
+                print(f"Geoapify API Response Status: {response.status_code}")  # Debug output
+                print(f"Geoapify API Response Text: {response.text}")  # Debug output
+                
+                # Check if response is JSON
+                content_type = response.headers.get('content-type', '')
+                if 'application/json' not in content_type:
+                    print(f"Non-JSON response received. Content-Type: {content_type}")
+                    return JSONResponse({"error": f"Invalid response from Geoapify API. Expected JSON, got {content_type}. Response: {response.text[:200]}"}, status_code=500)
+                
+                if response.status_code == 200:
+                    try:
+                        data = response.json()
+                    except Exception as json_error:
+                        print(f"Error parsing JSON response: {json_error}")
+                        return JSONResponse({"error": f"Failed to parse JSON response from Geoapify API: {str(json_error)}. Response text: {response.text[:200]}"}, status_code=500)
                     
-                    if properties and len(coordinates) >= 2:
-                        # Calculate accurate distance using haversine formula
-                        hospital_lon, hospital_lat = coordinates[0], coordinates[1]
-                        distance_km = haversine_distance(latitude, longitude, hospital_lat, hospital_lon)
+                    features = data.get("features", [])
+                    
+                    hospitals = []
+                    for feature in features:
+                        properties = feature.get("properties", {})
+                        coordinates = feature.get("geometry", {}).get("coordinates", [])
                         
-                        hospital_info = {
-                            "name": properties.get("name", "Unnamed Hospital"),
-                            "address": properties.get("formatted", "Address not available"),
-                            "distance": round(distance_km, 2),
-                            "estimated_time": int(distance_km * 2),  # Rough estimate: 2 minutes per km
-                            "phone": properties.get("phone", "Phone not available"),
-                            "specialist_name": "Medical Specialist"  # Default specialist name
-                        }
-                        hospitals.append(hospital_info)
-                
-                # Sort hospitals by distance
-                hospitals.sort(key=lambda x: x["distance"])
-                
-                # Return up to 5 nearest hospitals
-                return JSONResponse({"hospitals": hospitals[:5]})
-            else:
-                # Return error if API fails
-                return JSONResponse({"error": f"Geoapify API error: {response.status_code} - {response.text}"}, status_code=response.status_code)
+                        if properties and len(coordinates) >= 2:
+                            # Calculate accurate distance using haversine formula
+                            hospital_lon, hospital_lat = coordinates[0], coordinates[1]
+                            distance_km = haversine_distance(latitude, longitude, hospital_lat, hospital_lon)
+                            
+                            hospital_info = {
+                                "name": properties.get("name", "Unnamed Hospital"),
+                                "address": properties.get("formatted", "Address not available"),
+                                "distance": round(distance_km, 2),
+                                "estimated_time": int(distance_km * 2),  # Rough estimate: 2 minutes per km
+                                "phone": properties.get("phone", "Phone not available"),
+                                "specialist_name": "Medical Specialist"  # Default specialist name
+                            }
+                            hospitals.append(hospital_info)
+                    
+                    # Sort hospitals by distance
+                    hospitals.sort(key=lambda x: x["distance"])
+                    
+                    # Return up to 5 nearest hospitals
+                    return JSONResponse({"hospitals": hospitals[:5]})
+                else:
+                    # Return error if API fails
+                    return JSONResponse({"error": f"Geoapify API error: {response.status_code} - {response.text}"}, status_code=response.status_code)
+        except httpx.TimeoutException:
+            print("Geoapify API request timed out")
+            return JSONResponse({"error": "Request to Geoapify API timed out. Please try again."}, status_code=500)
+        except httpx.RequestError as e:
+            print(f"Geoapify API request error: {e}")
+            return JSONResponse({"error": f"Failed to connect to Geoapify API: {str(e)}"}, status_code=500)
+        except Exception as e:
+            print(f"Unexpected error in emergency hospitals: {e}")
+            import traceback
+            traceback.print_exc()
+            return JSONResponse({"error": f"Unexpected error: {str(e)}"}, status_code=500)
         
     except Exception as e:
         print(f"Error finding hospitals: {e}")
+        import traceback
+        traceback.print_exc()  # Print full traceback
         # Return error if there's an exception
         return JSONResponse({"error": f"Failed to find hospitals: {str(e)}"}, status_code=500)
 
@@ -497,22 +536,63 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
             return JSONResponse({"error": "No text provided"}, status_code=400)
         
         GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+        print(f"Gemini API Key: {GEMINI_API_KEY}")  # Debug output
         if not GEMINI_API_KEY or GEMINI_API_KEY == "your_gemini_api_key_here":
             # Return mock response when API key is not configured
             return JSONResponse({
                 "analysis": f"Mock analysis of symptoms: {text}\n\nNote: Gemini API key not configured. Please set GEMINI_API_KEY in .env file for real AI analysis."
             })
         
+        # Check if the API key is valid (not reported as leaked)
+        if "AIzaSyCrJaAJih1vUhv_lZHJZHycm4Nvsja9Png" in GEMINI_API_KEY:
+            # Return mock response when API key is reported as leaked
+            return JSONResponse({
+                "analysis": f"Mock analysis of symptoms: {text}\n\nNote: The provided Gemini API key has been reported as leaked. Please generate a new API key from the Google Cloud Console for real AI analysis."
+            })
+        
         # Use gemini-2.5-flash model which is available
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
         payload = {"contents": [{"parts": [{"text": f"Analyze these symptoms: {text}"}]}]}
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30.0)
-        if response.status_code != 200:
-            return JSONResponse({"error": f"API Error: {response.text}"}, status_code=response.status_code)
-        data = response.json()
-        analysis = data["candidates"][0]["content"]["parts"][0]["text"]
-        return JSONResponse({"analysis": analysis})
+        print(f"Requesting URL: {url}")  # Debug output
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30.0)
+                print(f"Gemini API Response Status: {response.status_code}")  # Debug output
+                print(f"Gemini API Response Text: {response.text}")  # Debug output
+                
+                # Check if response is JSON
+                content_type = response.headers.get('content-type', '')
+                if 'application/json' not in content_type:
+                    print(f"Non-JSON response received. Content-Type: {content_type}")
+                    return JSONResponse({"error": f"Invalid response from Gemini API. Expected JSON, got {content_type}. Response: {response.text[:200]}"}, status_code=response.status_code)
+                
+            if response.status_code != 200:
+                return JSONResponse({"error": f"API Error: {response.text}"}, status_code=response.status_code)
+            
+            try:
+                data = response.json()
+            except Exception as json_error:
+                print(f"Error parsing JSON response: {json_error}")
+                return JSONResponse({"error": f"Failed to parse JSON response from Gemini API: {str(json_error)}. Response text: {response.text[:200]}"}, status_code=500)
+            
+            # Check if response has the expected structure
+            if "candidates" not in data or not data["candidates"]:
+                return JSONResponse({"error": f"Unexpected response structure from Gemini API: {data}"}, status_code=500)
+                
+            analysis = data["candidates"][0]["content"]["parts"][0]["text"]
+            return JSONResponse({"analysis": analysis})
+        except httpx.TimeoutException:
+            print("Gemini API request timed out")
+            return JSONResponse({"error": "Request to Gemini API timed out. Please try again."}, status_code=500)
+        except httpx.RequestError as e:
+            print(f"Gemini API request error: {e}")
+            return JSONResponse({"error": f"Failed to connect to Gemini API: {str(e)}"}, status_code=500)
+        except Exception as e:
+            print(f"Unexpected error in AI diagnostics: {e}")
+            import traceback
+            traceback.print_exc()
+            return JSONResponse({"error": f"Unexpected error: {str(e)}"}, status_code=500)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 

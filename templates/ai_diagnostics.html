@@ -176,6 +176,13 @@
         method: 'POST',
         body: formData
       });
+      
+      // Check content type before parsing JSON
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+      
       var data = await res.json();
       resultBox.innerHTML = formatResult(data, 'image');
     } catch (err) {
@@ -195,6 +202,13 @@
         method: 'POST',
         body: formData
       });
+      
+      // Check content type before parsing JSON
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+      
       var data = await res.json();
       resultBox.innerHTML = formatResult(data, 'report');
     } catch (err) {
@@ -223,6 +237,13 @@
         },
         body: JSON.stringify(payload)
       });
+      
+      // Check content type before parsing JSON
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+      
       var data = await res.json();
       resultBox.innerHTML = formatResult(data, 'outcome');
     } catch (err) {
@@ -251,6 +272,13 @@
         },
         body: JSON.stringify(payload)
       });
+      
+      // Check content type before parsing JSON
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+      
       var data = await res.json();
       resultBox.innerHTML = formatResult(data, 'side-effect');
     } catch (err) {
