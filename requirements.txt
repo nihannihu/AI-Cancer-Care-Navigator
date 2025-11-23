@@ -10,13 +10,11 @@ jinja2
 httpx
 python-multipart
 motor
-tensorflow
 tensorflow-hub
 spacy
 transformers
 torch
 xgboost
-python-multipart
 pypdf
 scipy
 pytesseract
