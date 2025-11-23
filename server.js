@@ -12,8 +12,11 @@ const AI_BACKEND_URL = process.env.AI_BACKEND_URL || 'http://localhost:8000';
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from static directory
-app.use('/static', express.static('static'));
+// Serve static files from static directory with proper configuration for deployment
+app.use('/static', express.static(path.join(__dirname, 'static'), {
+  maxAge: '1d',
+  etag: false
+}));
 
 // Proxy API requests to Python backend
 app.use('/pcp', createProxyMiddleware({
