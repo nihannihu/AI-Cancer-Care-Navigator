@@ -374,8 +374,8 @@ async def get_dashboard(current_user: dict = Depends(get_current_user)):
     
     # 4. Generate QR with THEIR data
     try:
-        # Use configurable app URL for QR code
-        app_url = os.getenv("APP_URL", "http://localhost:8000")
+        # Use configurable app URL for QR code - fix the URL generation
+        app_url = os.getenv("APP_URL", "http://localhost:3000")  # Changed to 3000 for frontend
         qr_data = f"{app_url}/patient/profile/{patient_id}"
         qr_image = QRCodeGenerator.generate_qr(qr_data)
     except Exception as e:

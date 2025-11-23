@@ -96,17 +96,23 @@
                 longitude: lon
               })
             })
-              .then(response => response.json())
+              .then(response => {
+                // Check if response is OK before parsing JSON
+                if (!response.ok) {
+                  throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.json();
+              })
               .then(data => {
                 displayHospitals(data);
               })
               .catch(error => {
-                content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
+                content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p><p class="emergency-error">Details: ' + error.message + '</p>';
                 console.error('Error:', error);
               });
           },
           function (error) {
-            content.innerHTML = '<p class="emergency-error">Unable to get your location. Please call 1-800-CANCER immediately.</p>';
+            content.innerHTML = '<p class="emergency-error">Unable to get your location. Please call 1-800-CANCER immediately.</p><p class="emergency-error">Error code: ' + error.code + ' - ' + error.message + '</p>';
             console.error('Geolocation error:', error);
           }
         );

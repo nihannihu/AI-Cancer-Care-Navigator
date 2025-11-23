@@ -104,7 +104,7 @@
       // Add image preview if available
       if (data.image_preview) {
         html += '<div class="case-image-container">';
-        html += '<img src="' + data.image_preview + '" alt="Analyzed image" class="case-image-preview" />';
+        html += '<img src="' + data.image_preview + '" alt="Analyzed image" class="case-image-preview" onerror="this.src=\'/static/placeholder-image.png\'; this.alt=\'Image not available\';" />';
         html += '</div>';
       }
       
@@ -316,31 +316,37 @@
     var resultBox = document.getElementById('voice-result');
     
     if (!text || text === 'Waiting for speech...') {
-      alert('Please record some speech first.');
-      return;
+        alert('Please record some speech first.');
+        return;
     }
     
     resultBox.innerHTML = '<p>Analyzing symptoms...</p>';
     resultBox.classList.remove('hidden');
     
     try {
-      var res = await fetch('/api/analyze-symptoms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({text: text})
-      });
-      
-      if (!res.ok) {
-        throw new Error('API request failed with status ' + res.status);
-      }
-      
-      var data = await res.json();
-      resultBox.innerHTML = formatResult(data, 'voice');
+        var res = await fetch('/api/analyze-symptoms', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({text: text})
+        });
+        
+        // Check if response is OK before parsing JSON
+        if (!res.ok) {
+            throw new Error('API request failed with status ' + res.status + ': ' + await res.text());
+        }
+        
+        var contentType = res.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Expected JSON response but got ' + contentType);
+        }
+        
+        var data = await res.json();
+        resultBox.innerHTML = formatResult(data, 'voice');
     } catch (err) {
-      resultBox.innerHTML = '<div style="color: #721c24; background-color: #f8d7da; padding: 1rem;">Error: ' + err.message + '</div>';
+        resultBox.innerHTML = '<div style="color: #721c24; background-color: #f8d7da; padding: 1rem;">Error: ' + err.message + '</div>';
     }
-  };
+};
 </script>
 {% endblock %}

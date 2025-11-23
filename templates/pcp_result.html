@@ -40,7 +40,7 @@
     <div class="case-image">
       <h3 class="surface-title">Uploaded Scan Preview</h3>
       <div class="case-image-container">
-        <img src="{{ image_url }}" alt="Uploaded mammogram" class="case-image-preview" />
+        <img src="{{ image_url }}" alt="Uploaded mammogram" class="case-image-preview" onerror="this.src='/static/placeholder-image.png'; this.alt='Image not available';" />
       </div>
     </div>
     {% endif %}
