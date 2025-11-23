@@ -66,12 +66,12 @@ app.get('/api/status', (req, res) => {
 
 // Serve the main index.html for root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+  res.sendFile(path.join(__dirname, 'static', 'index.html'));
 });
 
 // Fallback to serve index.html for any other routes (SPA behavior)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'templates', 'index.html'));
+  res.sendFile(path.join(__dirname, 'static', 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
