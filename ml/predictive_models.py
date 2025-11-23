@@ -47,6 +47,7 @@ def predict_survival(age: int, stage: int, comorbidities: int) -> Dict[str, Any]
         
         return {
             "5_year_survival_probability": round(prob * 100, 2),
+            "risk_score": round(prob * 100, 2),
             "risk_category": "High Risk" if prob < 0.5 else "Low Risk",
             "predicted_diagnosis": "High Survival Chance" if prob > 0.5 else "Low Survival Chance",
             "probabilities": {

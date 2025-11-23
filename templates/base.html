@@ -76,7 +76,7 @@
       modal.style.display = 'block';
 
       // Reset content
-      content.innerHTML = '<p class="emergency-text">Locating your position and finding the nearest hospital...</p><div class="emergency-loader"></div>';
+      content.innerHTML = '<p class="emergency-text">Locating your position and finding the nearest hospital...</p><div class="emergency-loader"></div><p style="text-align:center; margin-top:10px; font-size:0.9rem; color:#cbd5e1;">If this takes too long, check your location permissions.</p>';
 
       // Check if geolocation is supported
       if (navigator.geolocation) {
@@ -102,7 +102,7 @@
                 if (!contentType || !contentType.includes('application/json')) {
                   throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
                 }
-                
+
                 // Check if response is OK before parsing JSON
                 if (!response.ok) {
                   return response.json().then(errorData => {
@@ -124,7 +124,7 @@
           },
           function (error) {
             let errorMessage = 'Unable to get your location. ';
-            switch(error.code) {
+            switch (error.code) {
               case error.PERMISSION_DENIED:
                 errorMessage += 'Location access denied. Please enable location services.';
                 break;
@@ -138,8 +138,13 @@
                 errorMessage += 'An unknown error occurred.';
                 break;
             }
-            content.innerHTML = '<p class="emergency-error">' + errorMessage + '</p><p class="emergency-error">Error code: ' + error.code + '</p>';
+            content.innerHTML = '<p class="emergency-error">' + errorMessage + '</p><p class="emergency-error">Error code: ' + error.code + '</p><button class="btn" onclick="document.getElementById(\'emergency-button\').click()" style="margin-top:1rem;">Try Again</button>';
             console.error('Geolocation error:', error);
+          },
+          {
+            timeout: 10000, // 10 seconds timeout
+            enableHighAccuracy: true,
+            maximumAge: 0
           }
         );
       } else {
@@ -168,6 +173,17 @@
         content.innerHTML = html;
       } else {
         content.innerHTML = '<p class="emergency-error">No hospitals found nearby. Please call 1-800-CANCER immediately.</p>';
+      }
+    }
+
+    // Modal close logic
+    document.querySelector('.emergency-close').addEventListener('click', function () {
+      document.getElementById('emergency-modal').style.display = 'none';
+    });
+
+    window.onclick = function (event) {
+      if (event.target == document.getElementById('emergency-modal')) {
+        document.getElementById('emergency-modal').style.display = 'none';
       }
     }
   </script>
