@@ -19,6 +19,7 @@ app.use('/static', express.static(path.join(__dirname, 'static'), {
 }));
 
 // Proxy API requests to Python backend
+// Core app pages
 app.use('/pcp', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
@@ -41,6 +42,20 @@ app.use('/ai-diagnostics', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false, // For ngrok https
+}));
+
+// AI API endpoints
+app.use('/api', createProxyMiddleware({
+  target: AI_BACKEND_URL,
+  changeOrigin: true,
+  secure: false,
+}));
+
+// Emergency hospital finder
+app.use('/emergency-hospitals', createProxyMiddleware({
+  target: AI_BACKEND_URL,
+  changeOrigin: true,
+  secure: false,
 }));
 
 // Health check endpoint

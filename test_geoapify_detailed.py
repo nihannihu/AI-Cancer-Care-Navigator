@@ -2,6 +2,10 @@ import os
 from dotenv import load_dotenv
 import httpx
 import asyncio
+import pytest
+
+# This is a manual integration script and not part of the automated pytest suite
+pytestmark = pytest.mark.skip("Manual Geoapify integration script; run directly with python, not via pytest")
 
 # Load environment variables
 load_dotenv(".env.python")

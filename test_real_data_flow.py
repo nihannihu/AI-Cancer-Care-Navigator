@@ -15,6 +15,10 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+import pytest
+
+# This is a manual end-to-end flow script and not part of the automated pytest suite
+pytestmark = pytest.mark.skip("Manual real data flow script; run directly with python, not via pytest")
 
 load_dotenv()
 
