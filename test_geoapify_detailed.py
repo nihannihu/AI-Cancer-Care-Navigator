@@ -17,7 +17,10 @@ print(f"Geoapify API Key: {GEOAPIFY_API_KEY}")
 async def test_geoapify():
     if GEOAPIFY_API_KEY:
         # Correct order: longitude, latitude
-        url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare&filter=circle:78.4312,17.4243,10000&limit=5&apiKey={GEOAPIFY_API_KEY}"
+        # Use expanded search radius (50km instead of 10km)
+        # Use only supported categories
+        search_radius = 50000  # 50km in meters
+        url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare&filter=circle:78.4312,17.4243,{search_radius}&limit=10&apiKey={GEOAPIFY_API_KEY}"
         print(f"Requesting URL: {url}")
         
         try:
@@ -26,14 +29,21 @@ async def test_geoapify():
                 print(f"Response Status: {response.status_code}")
                 print(f"Response Headers: {response.headers}")
                 print(f"Content-Type: {response.headers.get('content-type')}")
-                print(f"Response Text: {response.text[:1000]}")
                 
                 if response.status_code == 200:
                     try:
                         data = response.json()
-                        print(f"Parsed JSON data: {data}")
+                        features = data.get("features", [])
+                        print(f"Found {len(features)} hospitals")
+                        print(f"First hospital: {features[0] if features else 'None'}")
+                        
+                        # Print first few features for inspection
+                        for i, feature in enumerate(features[:3]):
+                            props = feature.get("properties", {})
+                            print(f"Hospital {i+1}: {props.get('name', 'Unknown')} at {props.get('distance', 'Unknown')}m")
                     except Exception as json_error:
                         print(f"Error parsing JSON: {json_error}")
+                        print(f"Response text: {response.text[:500]}")
                 else:
                     print(f"Error response: {response.text}")
         except Exception as e:

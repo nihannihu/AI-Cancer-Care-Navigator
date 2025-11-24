@@ -23,8 +23,9 @@ TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
 UPLOADS_DIR = STATIC_DIR / "uploads"
 
-# Load configuration from .env if present
+# Load configuration from .env and .env.python if present
 load_dotenv(ROOT / ".env")
+load_dotenv(ROOT / ".env.python", override=True)
 
 app = FastAPI(title="Onco-Navigator AI (No React)")
 
@@ -279,56 +280,6 @@ async def api_predict(file: UploadFile = File(...)) -> JSONResponse:
 
 # -------------------- Emergency Hospital Finder -----------------------------
 
-@app.post("/emergency-hospitals")
-async def emergency_hospitals(request: Request) -> JSONResponse:
-    """
-    Find nearby hospitals based on patient's location using Geoapify API
-    """
-    try:
-        body = await request.json()
-        latitude = body.get("latitude")
-        longitude = body.get("longitude")
-        
-        # If no location provided, use mock data as fallback
-        if not latitude or not longitude:
-            print("No location provided, returning mock hospitals")
-            return get_mock_hospitals_near_location(0, 0)
-        
-        # Check if Geoapify API key is available
-        if not GEOAPIFY_API_KEY:
-            print("No Geoapify API key, using mock data")
-            return get_mock_hospitals_near_location(latitude, longitude)
-        
-        # Use Geoapify API to find nearby hospitals
-        async with httpx.AsyncClient() as client:
-            # Search for hospitals and medical facilities within 10km radius
-            url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare.clinic,healthcare&filter=circle:{longitude},{latitude},10000&limit=10&apiKey={GEOAPIFY_API_KEY}"
-            print(f"Calling Geoapify API: {url[:100]}...")
-            response = await client.get(url, timeout=10.0)
-            
-            if response.status_code == 200:
-                data = response.json()
-                features = data.get("features", [])
-                
-                if features and len(features) > 0:
-                    print(f"Found {len(features)} hospitals from Geoapify")
-                    # Return the features directly - frontend expects this format
-                    return JSONResponse({"features": features[:10]})
-                else:
-                    print("No hospitals found via API, using mock data")
-                    return get_mock_hospitals_near_location(latitude, longitude)
-            else:
-                print(f"Geoapify API failed with status {response.status_code}, using mock data")
-                return get_mock_hospitals_near_location(latitude, longitude)
-        
-    except Exception as e:
-        print(f"Error in emergency hospitals: {e}")
-        # Final fallback to mock data
-        lat = body.get("latitude", 0) if 'body' in locals() else 0
-        lon = body.get("longitude", 0) if 'body' in locals() else 0
-        return get_mock_hospitals_near_location(lat, lon)
-
-
 def haversine_distance(lat1, lon1, lat2, lon2):
     """
     Calculate the great circle distance between two points on the earth
@@ -348,6 +299,102 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     r = 6371
     
     return c * r
+
+@app.post("/emergency-hospitals")
+async def emergency_hospitals(request: Request) -> JSONResponse:
+    """
+    Find nearby hospitals based on patient's location using Geoapify API
+    """
+    try:
+        body = await request.json()
+        print(f"Received emergency hospital request: {body}")
+        latitude = body.get("latitude")
+        longitude = body.get("longitude")
+        print(f"Location data - Latitude: {latitude}, Longitude: {longitude}")
+        
+        # If no location provided, use mock data as fallback
+        if not latitude or not longitude:
+            print("No location provided, returning mock hospitals")
+            return get_mock_hospitals_near_location(0, 0)
+        
+        # Check if Geoapify API key is available
+        if not GEOAPIFY_API_KEY:
+            print("No Geoapify API key, using mock data")
+            return get_mock_hospitals_near_location(latitude, longitude)
+        
+        print(f"Geoapify API Key available: {bool(GEOAPIFY_API_KEY)}")
+        print(f"Searching for hospitals near: {latitude}, {longitude}")
+        
+        # Use Geoapify API to find nearby hospitals with expanded search radius
+        async with httpx.AsyncClient(timeout=30.0) as client:  # Increased timeout
+            # Search for hospitals and medical facilities within 50km radius (increased from 10km)
+            # Use only supported categories
+            search_radius = 50000  # 50km in meters
+            url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare&filter=circle:{longitude},{latitude},{search_radius}&limit=15&apiKey={GEOAPIFY_API_KEY}"
+            print(f"Calling Geoapify API: {url}")
+            
+            # Add headers to mimic a browser request
+            headers = {
+                "User-Agent": "Onco-Navigator AI/1.0",
+                "Accept": "application/json"
+            }
+            
+            response = await client.get(url, headers=headers, timeout=30.0)
+            
+            print(f"Geoapify API response status: {response.status_code}")
+            
+            if response.status_code == 200:
+                data = response.json()
+                features = data.get("features", [])
+                
+                print(f"Found {len(features)} hospitals from Geoapify")
+                if features:
+                    print(f"First hospital name: {features[0].get('properties', {}).get('name', 'Unknown')}")
+                
+                if features and len(features) > 0:
+                    # Calculate accurate distances from user location to each hospital
+                    for feature in features:
+                        props = feature.get("properties", {})
+                        geometry = feature.get("geometry", {})
+                        coords = geometry.get("coordinates", [])
+                        
+                        if len(coords) >= 2:
+                            hospital_lon, hospital_lat = coords[0], coords[1]
+                            # Calculate distance using haversine formula
+                            distance_km = haversine_distance(latitude, longitude, hospital_lat, hospital_lon)
+                            # Add distance in meters (as Geoapify does) for consistency
+                            props["distance"] = int(distance_km * 1000)
+                            # Also add distance in km for display
+                            props["distance_km"] = round(distance_km, 2)
+                    
+                    # Sort by actual distance from user location
+                    sorted_features = sorted(features, key=lambda x: x.get("properties", {}).get("distance", float('inf')))
+                    
+                    # Return top 5 closest hospitals (as per requirements)
+                    result = {"features": sorted_features[:5]}
+                    print(f"Returning real hospital data with accurate distances: {result}")
+                    return JSONResponse(result)
+                else:
+                    print("No hospitals found via API, using mock data")
+                    return get_mock_hospitals_near_location(latitude, longitude)
+            else:
+                print(f"Geoapify API failed with status {response.status_code}, using mock data")
+                print(f"Response content: {response.text}")
+                return get_mock_hospitals_near_location(latitude, longitude)
+        
+    except httpx.TimeoutException:
+        print("Geoapify API request timed out, using mock data")
+        lat = body.get("latitude", 0) if 'body' in locals() else 0
+        lon = body.get("longitude", 0) if 'body' in locals() else 0
+        return get_mock_hospitals_near_location(lat, lon)
+    except Exception as e:
+        print(f"Error in emergency hospitals: {e}")
+        import traceback
+        traceback.print_exc()
+        # Final fallback to mock data
+        lat = body.get("latitude", 0) if 'body' in locals() else 0
+        lon = body.get("longitude", 0) if 'body' in locals() else 0
+        return get_mock_hospitals_near_location(lat, lon)
 
 
 def get_mock_hospitals_near_location(user_lat, user_lon):
@@ -459,36 +506,58 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
         if not text:
             return JSONResponse({"error": "No text provided"}, status_code=400)
         
-        # Use OpenAI API instead of Gemini
-        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-        if not OPENAI_API_KEY:
-            return JSONResponse({"error": "OpenAI API key not configured"}, status_code=500)
+        # Use Gemini API instead of OpenAI
+        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+        if not GEMINI_API_KEY:
+            return JSONResponse({"error": "Gemini API key not configured"}, status_code=500)
         
-        url = "https://api.openai.com/v1/chat/completions"
+        # Use gemini-pro-latest model which should be more widely available
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={GEMINI_API_KEY}"
         payload = {
-            "model": "gpt-3.5-turbo",
-            "messages": [
-                {"role": "system", "content": "You are a medical assistant. Analyze the following symptoms and provide helpful medical insights."},
-                {"role": "user", "content": f"Analyze these symptoms: {text}"}
-            ],
-            "max_tokens": 500
+            "contents": [{
+                "parts": [{
+                    "text": f"You are a medical assistant. Analyze the following symptoms and provide helpful medical insights: {text}"
+                }]
+            }]
         }
         headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {OPENAI_API_KEY}"
+            "Content-Type": "application/json"
         }
         
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=payload, headers=headers, timeout=30.0)
         
         if response.status_code != 200:
-            return JSONResponse({"error": f"API Error: {response.text}"}, status_code=response.status_code)
+            error_text = response.text
+            return JSONResponse({
+                "error": f"Gemini API Error ({response.status_code}): {error_text}",
+                "status_code": response.status_code
+            }, status_code=response.status_code)
         
-        data = response.json()
-        analysis = data["choices"][0]["message"]["content"]
-        return JSONResponse({"analysis": analysis})
+        try:
+            data = response.json()
+            if "candidates" in data and len(data["candidates"]) > 0 and "content" in data["candidates"][0] and "parts" in data["candidates"][0]["content"] and len(data["candidates"][0]["content"]["parts"]) > 0:
+                analysis = data["candidates"][0]["content"]["parts"][0]["text"]
+                return JSONResponse({"analysis": analysis})
+            else:
+                return JSONResponse({
+                    "error": "Unexpected response format from Gemini API",
+                    "response": data
+                }, status_code=500)
+        except Exception as json_error:
+            return JSONResponse({
+                "error": f"Failed to parse Gemini API response: {str(json_error)}",
+                "raw_response": response.text[:500]
+            }, status_code=500)
+            
     except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
+        print(f"Unexpected error in symptom analysis: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({
+            "error": f"Unexpected error: {str(e)}",
+            "type": type(e).__name__
+        }, status_code=500)
 
 
 # To run: uvicorn app_main:app --reload
