@@ -4,19 +4,6 @@ const path = require('path');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 require('dotenv').config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-const AI_BACKEND_URL = process.env.AI_BACKEND_URL || 'http://localhost:8000';
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-// Serve static files from static directory with proper configuration for deployment
-app.use('/static', express.static(path.join(__dirname, 'static'), {
-  maxAge: '1d',
-  etag: false
-}));
 
 // Proxy API requests to Python backend
 // Core app pages
@@ -60,8 +47,8 @@ app.use('/emergency-hospitals', createProxyMiddleware({
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     message: 'Frontend server is running',
     backend: AI_BACKEND_URL
   });
@@ -69,8 +56,8 @@ app.get('/health', (req, res) => {
 
 // API status endpoint
 app.get('/api/status', (req, res) => {
-  res.json({ 
-    status: 'Frontend Ready', 
+  res.json({
+    status: 'Frontend Ready',
     message: 'Proxy server configured',
     backend: AI_BACKEND_URL,
     setup: {
