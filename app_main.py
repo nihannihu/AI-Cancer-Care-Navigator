@@ -280,70 +280,53 @@ async def api_predict(file: UploadFile = File(...)) -> JSONResponse:
 # -------------------- Emergency Hospital Finder -----------------------------
 
 @app.post("/emergency-hospitals")
-async def emergency_hospitals(request: Request, location: dict) -> JSONResponse:
+async def emergency_hospitals(request: Request) -> JSONResponse:
     """
     Find nearby hospitals based on patient's location using Geoapify API
     """
     try:
-        latitude = location.get("latitude")
-        longitude = location.get("longitude")
+        body = await request.json()
+        latitude = body.get("latitude")
+        longitude = body.get("longitude")
         
+        # If no location provided, use mock data as fallback
         if not latitude or not longitude:
-            return JSONResponse({"error": "Invalid location data"}, status_code=400)
+            print("No location provided, returning mock hospitals")
+            return get_mock_hospitals_near_location(0, 0)
         
         # Check if Geoapify API key is available
         if not GEOAPIFY_API_KEY:
-            # Fallback to mock data if API key is missing
-            latitude = location.get("latitude", 17.4243)
-            longitude = location.get("longitude", 78.4312)
+            print("No Geoapify API key, using mock data")
             return get_mock_hospitals_near_location(latitude, longitude)
         
         # Use Geoapify API to find nearby hospitals
         async with httpx.AsyncClient() as client:
             # Search for hospitals and medical facilities within 10km radius
-            response = await client.get(
-                f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare.clinic,healthcare&filter=circle:{longitude},{latitude},10000&limit=5&apiKey={GEOAPIFY_API_KEY}"
-            )
+            url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare.clinic,healthcare&filter=circle:{longitude},{latitude},10000&limit=10&apiKey={GEOAPIFY_API_KEY}"
+            print(f"Calling Geoapify API: {url[:100]}...")
+            response = await client.get(url, timeout=10.0)
             
             if response.status_code == 200:
                 data = response.json()
                 features = data.get("features", [])
                 
-                hospitals = []
-                for feature in features:
-                    properties = feature.get("properties", {})
-                    coordinates = feature.get("geometry", {}).get("coordinates", [])
-                    
-                    if properties and len(coordinates) >= 2:
-                        # Calculate accurate distance using haversine formula
-                        hospital_lon, hospital_lat = coordinates[0], coordinates[1]
-                        distance_km = haversine_distance(latitude, longitude, hospital_lat, hospital_lon)
-                        
-                        hospital_info = {
-                            "name": properties.get("name", "Unnamed Hospital"),
-                            "address": properties.get("formatted", "Address not available"),
-                            "distance": round(distance_km, 2),
-                            "estimated_time": int(distance_km * 2),  # Rough estimate: 2 minutes per km
-                            "phone": properties.get("phone", "Phone not available"),
-                            "specialist_name": "Medical Specialist"  # Default specialist name
-                        }
-                        hospitals.append(hospital_info)
-                
-                # Sort hospitals by distance
-                hospitals.sort(key=lambda x: x["distance"])
-                
-                # Return up to 5 nearest hospitals
-                return JSONResponse({"hospitals": hospitals[:5]})
+                if features and len(features) > 0:
+                    print(f"Found {len(features)} hospitals from Geoapify")
+                    # Return the features directly - frontend expects this format
+                    return JSONResponse({"features": features[:10]})
+                else:
+                    print("No hospitals found via API, using mock data")
+                    return get_mock_hospitals_near_location(latitude, longitude)
             else:
-                # Fallback to mock data if API fails - using user's actual location
+                print(f"Geoapify API failed with status {response.status_code}, using mock data")
                 return get_mock_hospitals_near_location(latitude, longitude)
         
     except Exception as e:
-        print(f"Error finding hospitals: {e}")
-        # Fallback to mock data if there's an error
-        latitude = location.get("latitude", 17.4243)
-        longitude = location.get("longitude", 78.4312)
-        return get_mock_hospitals_near_location(latitude, longitude)
+        print(f"Error in emergency hospitals: {e}")
+        # Final fallback to mock data
+        lat = body.get("latitude", 0) if 'body' in locals() else 0
+        lon = body.get("longitude", 0) if 'body' in locals() else 0
+        return get_mock_hospitals_near_location(lat, lon)
 
 
 def haversine_distance(lat1, lon1, lat2, lon2):
@@ -369,51 +352,61 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 
 def get_mock_hospitals_near_location(user_lat, user_lon):
     """
-    Generate mock hospitals near the user's actual location
+    Generate mock hospitals in Geoapify features format
     """
     import random
     
     # Generate mock hospitals within 5km of user's location
-    mock_hospitals = []
+    mock_features = []
     
     hospital_names = [
         "City General Hospital",
         "Metropolitan Medical Center",
         "Community Health Center",
-        "Regional Medical Facility",
-        "District Hospital",
-        "Public Health Center",
-        "Central Clinic",
+        "Regional Cancer Treatment Center",
+        "District Hospital & Oncology",
+        "Public Health Medical Center",
+        "Central Clinic & Emergency Care",
         "University Medical Center",
-        "General Hospital",
-        "Healthcare Center"
+        "General Hospital & Cancer Care",
+        "Healthcare Center & Oncology"
     ]
     
-    for i in range(5):
+    for i in range(10):
         # Generate random offset within ~5km
-        lat_offset = random.uniform(-0.045, 0.045)  # ~5km latitude offset
-        lon_offset = random.uniform(-0.045, 0.045)  # ~5km longitude offset
+        lat_offset = random.uniform(-0.045, 0.045)
+        lon_offset = random.uniform(-0.045, 0.045)
         
         hospital_lat = user_lat + lat_offset
         hospital_lon = user_lon + lon_offset
         
-        # Calculate accurate distance
-        distance = haversine_distance(user_lat, user_lon, hospital_lat, hospital_lon)
+        # Calculate distance
+        distance = haversine_distance(user_lat, user_lon, hospital_lat, hospital_lon) if user_lat != 0 else random.uniform(1, 5)
         
-        hospital_info = {
-            "name": f"{random.choice(hospital_names)} {i+1}",
-            "address": f"{random.randint(100, 999)} {random.choice(['Main St', 'Oak Ave', 'Pine Rd', 'Elm St', 'Maple Dr'])}",
-            "distance": round(distance, 2),
-            "estimated_time": int(distance * 2),
-            "phone": f"+1 ({random.randint(200, 999)}) {random.randint(100, 999)}-{random.randint(1000, 9999)}",
-            "specialist_name": "Emergency Medical Specialist"
+        # Create feature in Geoapify format
+        feature = {
+            "type": "Feature",
+            "properties": {
+                "name": f"{random.choice(hospital_names)}",
+                "address_line1": f"{random.randint(100, 999)} {random.choice(['Main St', 'Oak Ave', 'Pine Rd', 'Elm St', 'Maple Dr', 'Hospital Rd', 'Medical Plaza'])}",
+                "address_line2": f"{random.choice(['Downtown', 'Westside', 'North Hills', 'South End', 'East District'])}",
+                "city": "City",
+                "formatted": f"{random.randint(100, 999)} {random.choice(['Main St', 'Oak Ave', 'Pine Rd'])}, City",
+                "distance": int(distance * 1000),  # Geoapify returns distance in meters
+                "phone": f"+1 ({random.randint(200, 999)}) {random.randint(100, 999)}-{random.randint(1000, 9999)}",
+                "categories": ["healthcare.hospital"]
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [hospital_lon, hospital_lat]
+            }
         }
-        mock_hospitals.append(hospital_info)
+        mock_features.append(feature)
     
     # Sort by distance
-    mock_hospitals.sort(key=lambda x: x["distance"])
+    mock_features.sort(key=lambda x: x["properties"]["distance"])
     
-    return JSONResponse({"hospitals": mock_hospitals[:5]})
+    return JSONResponse({"features": mock_features[:10]})
 
 
 # AI Diagnostics API Endpoints
@@ -466,7 +459,7 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
         if not text:
             return JSONResponse({"error": "No text provided"}, status_code=400)
         GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
         payload = {"contents": [{"parts": [{"text": f"Analyze these symptoms: {text}"}]}]}
         async with httpx.AsyncClient() as client:
             response = await client.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30.0)
