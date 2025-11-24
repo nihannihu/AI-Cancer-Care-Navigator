@@ -15,6 +15,9 @@ import httpx
 
 from ml.model_utils import BreastCancerModel
 
+# Import patient app router
+from patient_app.router import patient_app_router
+
 ROOT = Path(__file__).resolve().parent
 TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
@@ -28,15 +31,11 @@ app = FastAPI(title="Onco-Navigator AI (No React)")
 # Include the patient app router
 app.include_router(patient_app_router, prefix="/patient")
 
-
 # Mount static files if directory exists
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
-
-# Load model once at startup (honour MODEL_PATH if set)
-_model_path_env = os.getenv("MODEL_PATH")
 model = BreastCancerModel(Path(_model_path_env)) if _model_path_env else BreastCancerModel()
 
 # Optional MongoDB client (mirrors data for persistence; app still works without it)
