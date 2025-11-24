@@ -40,8 +40,14 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 
 # Load model once at startup (honour MODEL_PATH if set)
 _model_path_env = os.getenv("MODEL_PATH")
-model = BreastCancerModel(Path(_model_path_env)) if _model_path_env else BreastCancerModel()
-model = BreastCancerModel(Path(_model_path_env)) if _model_path_env else BreastCancerModel()
+try:
+    model = BreastCancerModel(Path(_model_path_env)) if _model_path_env else BreastCancerModel()
+    model = BreastCancerModel(Path(_model_path_env)) if _model_path_env else BreastCancerModel()
+    print("✅ Breast cancer model loaded successfully")
+except Exception as e:
+    print(f"⚠️ Warning: Could not load breast cancer model: {e}")
+    print("⚠️ Initializing app without model - image analysis features will be disabled")
+    model = None
 
 # Optional MongoDB client (mirrors data for persistence; app still works without it)
 MONGODB_URI = os.getenv("MONGODB_URI")
@@ -95,9 +101,24 @@ async def pcp_upload(
     patient_name: str = Form(...),
     file: UploadFile = File(...),
 ) -> HTMLResponse:
+    # Check if model is available
+    if model is None:
+        return templates.TemplateResponse(
+            "pcp_result.html",
+            {
+                "request": request,
+                "patient_name": patient_name,
+                "risk_label": "MODEL_UNAVAILABLE",
+                "risk_score": 0.0,
+                "case_id": 0,
+                "image_url": None,
+                "error": "Model not available - image analysis disabled"
+            },
+        )
+    
     data = await file.read()
     label, score = model.predict_label(data)
-
+    
     case_id = len(SCAN_CASES) + 1
 
     # Persist uploaded image so it can be previewed in the UI
