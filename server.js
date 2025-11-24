@@ -23,6 +23,9 @@ app.use('/static/uploads', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false,
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 }));
 
 // Proxy API requests to Python backend
@@ -31,24 +34,36 @@ app.use('/pcp', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false, // For ngrok https
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 }));
 
 app.use('/oncologist', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false, // For ngrok https
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 }));
 
 app.use('/patient', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false, // For ngrok https
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 }));
 
 app.use('/ai-diagnostics', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false, // For ngrok https
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 }));
 
 // AI API endpoints
@@ -56,6 +71,9 @@ app.use('/api', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false,
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 }));
 
 // Emergency hospital finder
@@ -63,6 +81,9 @@ app.use('/emergency-hospitals', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
   secure: false,
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
 }));
 
 // Health check endpoint
