@@ -458,15 +458,34 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
         text = body.get("text", "")
         if not text:
             return JSONResponse({"error": "No text provided"}, status_code=400)
-        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
-        payload = {"contents": [{"parts": [{"text": f"Analyze these symptoms: {text}"}]}]}
+        
+        # Use OpenAI API instead of Gemini
+        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+        if not OPENAI_API_KEY:
+            return JSONResponse({"error": "OpenAI API key not configured"}, status_code=500)
+        
+        url = "https://api.openai.com/v1/chat/completions"
+        payload = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                {"role": "system", "content": "You are a medical assistant. Analyze the following symptoms and provide helpful medical insights."},
+                {"role": "user", "content": f"Analyze these symptoms: {text}"}
+            ],
+            "max_tokens": 500
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {OPENAI_API_KEY}"
+        }
+        
         async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30.0)
+            response = await client.post(url, json=payload, headers=headers, timeout=30.0)
+        
         if response.status_code != 200:
             return JSONResponse({"error": f"API Error: {response.text}"}, status_code=response.status_code)
+        
         data = response.json()
-        analysis = data["candidates"][0]["content"]["parts"][0]["text"]
+        analysis = data["choices"][0]["message"]["content"]
         return JSONResponse({"analysis": analysis})
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)

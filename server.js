@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
@@ -29,11 +30,10 @@ app.use('/static/uploads', createProxyMiddleware({
 }));
 
 // Proxy API requests to Python backend
-// Core app pages
 app.use('/pcp', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
-  secure: false, // For ngrok https
+  secure: false,
   headers: {
     'ngrok-skip-browser-warning': 'true'
   }
@@ -42,7 +42,7 @@ app.use('/pcp', createProxyMiddleware({
 app.use('/oncologist', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
-  secure: false, // For ngrok https
+  secure: false,
   headers: {
     'ngrok-skip-browser-warning': 'true'
   }
@@ -51,7 +51,7 @@ app.use('/oncologist', createProxyMiddleware({
 app.use('/patient', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
-  secure: false, // For ngrok https
+  secure: false,
   headers: {
     'ngrok-skip-browser-warning': 'true'
   }
@@ -60,7 +60,7 @@ app.use('/patient', createProxyMiddleware({
 app.use('/ai-diagnostics', createProxyMiddleware({
   target: AI_BACKEND_URL,
   changeOrigin: true,
-  secure: false, // For ngrok https
+  secure: false,
   headers: {
     'ngrok-skip-browser-warning': 'true'
   }
@@ -76,15 +76,43 @@ app.use('/api', createProxyMiddleware({
   }
 }));
 
-// Emergency hospital finder
-app.use('/emergency-hospitals', createProxyMiddleware({
-  target: AI_BACKEND_URL,
-  changeOrigin: true,
-  secure: false,
-  headers: {
-    'ngrok-skip-browser-warning': 'true'
+// Emergency hospital finder - implemented in Node.js with Geoapify
+app.post('/emergency-hospitals', async (req, res) => {
+  try {
+    const { latitude, longitude } = req.body;
+
+    const GEOAPIFY_API_KEY = process.env.GEOAPIFY_API_KEY;
+
+    if (!GEOAPIFY_API_KEY) {
+      console.log('No Geoapify API key found');
+      return res.status(500).json({ error: 'Geoapify API key not configured' });
+    }
+
+    if (!latitude || !longitude) {
+      console.log('No location provided');
+      return res.status(400).json({ error: 'Location required' });
+    }
+
+    console.log(`Searching for hospitals near: ${latitude}, ${longitude}`);
+
+    // Call Geoapify API
+    const url = `https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare.clinic,healthcare&filter=circle:${longitude},${latitude},10000&limit=10&apiKey=${GEOAPIFY_API_KEY}`;
+
+    const response = await axios.get(url, { timeout: 10000 });
+
+    if (response.data && response.data.features && response.data.features.length > 0) {
+      console.log(`Found ${response.data.features.length} hospitals from Geoapify`);
+      return res.json({ features: response.data.features });
+    } else {
+      console.log('No hospitals found from Geoapify');
+      return res.status(404).json({ error: 'No hospitals found nearby' });
+    }
+
+  } catch (error) {
+    console.error('Error finding hospitals:', error.message);
+    return res.status(500).json({ error: 'Failed to find hospitals: ' + error.message });
   }
-}));
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -92,21 +120,6 @@ app.get('/health', (req, res) => {
     status: 'OK',
     message: 'Frontend server is running',
     backend: AI_BACKEND_URL
-  });
-});
-
-// API status endpoint
-app.get('/api/status', (req, res) => {
-  res.json({
-    status: 'Frontend Ready',
-    message: 'Proxy server configured',
-    backend: AI_BACKEND_URL,
-    setup: {
-      buildCommand: 'npm install',
-      startCommand: 'node server.js',
-      runtime: 'Node.js',
-      port: 'PORT environment variable or 3000'
-    }
   });
 });
 
