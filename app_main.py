@@ -20,28 +20,6 @@ from patient_app.router import patient_app_router
 
 ROOT = Path(__file__).resolve().parent
 TEMPLATES_DIR = ROOT / "templates"
-from __future__ import annotations
-
-from pathlib import Path
-from typing import List, Optional
-import os
-from datetime import datetime
-
-from fastapi import FastAPI, File, Form, Request, UploadFile
-from motor.motor_asyncio import AsyncIOMotorClient
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from dotenv import load_dotenv
-import httpx
-
-from ml.model_utils import BreastCancerModel
-
-# Import patient app router
-from patient_app.router import patient_app_router
-
-ROOT = Path(__file__).resolve().parent
-TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
 UPLOADS_DIR = STATIC_DIR / "uploads"
 
@@ -400,90 +378,5 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
         
         # Check if the API key is valid (not reported as leaked)
         if "AIzaSyCrJaAJih1vUhv_lZHJZHycm4Nvsja9Png" in GEMINI_API_KEY:
-            # Return mock response when API key is reported as leaked
-            return JSONResponse({
-                "analysis": f"Mock analysis of symptoms: {text}\n\nNote: The provided Gemini API key has been reported as leaked. Please generate a new API key from the Google Cloud Console for real AI analysis."
-            })
-        
-        # Use gemini-2.5-flash model which is available
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-        payload = {"contents": [{"parts": [{"text": f"Analyze these symptoms: {text}"}]}]}
-        print(f"Requesting URL: {url}")  # Debug output
-        
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(url, json=payload, headers={"Content-Type": "application/json"}, timeout=30.0)
-                print(f"Gemini API Response Status: {response.status_code}")  # Debug output
-                print(f"Gemini API Response Text: {response.text}")  # Debug output
-                
-                # Check if response is JSON
-                content_type = response.headers.get('content-type', '')
-                if 'application/json' not in content_type:
-                    print(f"Non-JSON response received. Content-Type: {content_type}")
-                    return JSONResponse({"error": f"Invalid response from Gemini API. Expected JSON, got {content_type}. Response: {response.text[:200]}"}, status_code=response.status_code)
-                
-            if response.status_code != 200:
-                return JSONResponse({"error": f"API Error: {response.text}"}, status_code=response.status_code)
-            
-            try:
-                data = response.json()
-            except Exception as json_error:
-                print(f"Error parsing JSON response: {json_error}")
-                return JSONResponse({"error": f"Failed to parse JSON response from Gemini API: {str(json_error)}. Response text: {response.text[:200]}"}, status_code=500)
-            
-            # Check if response has the expected structure
-            if "candidates" not in data or not data["candidates"]:
-                return JSONResponse({"error": f"Unexpected response structure from Gemini API: {data}"}, status_code=500)
-                
-            analysis = data["candidates"][0]["content"]["parts"][0]["text"]
-            return JSONResponse({"analysis": analysis})
-        except httpx.TimeoutException:
-            print("Gemini API request timed out")
-            return JSONResponse({"error": "Request to Gemini API timed out. Please try again."}, status_code=500)
-        except httpx.RequestError as e:
-            print(f"Gemini API request error: {e}")
-            return JSONResponse({"error": f"Failed to connect to Gemini API: {str(e)}"}, status_code=500)
-        except Exception as e:
-            print(f"Unexpected error in AI diagnostics: {e}")
-            import traceback
-            traceback.print_exc()
-            return JSONResponse({"error": f"Unexpected error: {str(e)}"}, status_code=500)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-# -------------------- Emergency Hospital Finder --------------------
-
-@app.post("/emergency-hospitals")
-async def emergency_hospitals(request: Request) -> JSONResponse:
-    try:
-        body = await request.json()
-        lat = body.get("latitude")
-        lon = body.get("longitude")
-        
-        if not lat or not lon:
-            return JSONResponse({"error": "Latitude and longitude required"}, status_code=400)
-            
-        if not GEOAPIFY_API_KEY:
-             return JSONResponse({"error": "Geoapify API key not configured"}, status_code=500)
-
-        # Search for hospitals within 10km
-        url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare&filter=circle:{lon},{lat},10000&limit=10&apiKey={GEOAPIFY_API_KEY}"
-        
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            
-        if response.status_code != 200:
-            return JSONResponse({"error": "Failed to fetch hospitals"}, status_code=response.status_code)
-            
-        data = response.json()
-        return JSONResponse(data)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-# To run: uvicorn app_main:app --reload
-if __name__ == "__main__":
-    import uvicorn
-
-    host = os.getenv("APP_HOST", "0.0.0.0")
     port = int(os.getenv("APP_PORT", "8000"))
     uvicorn.run("app_main:app", host=host, port=port, reload=True)
