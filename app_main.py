@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import List, Optional
 import os
 from datetime import datetime
+import json
 
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -14,6 +15,9 @@ from dotenv import load_dotenv
 import httpx
 
 from ml.model_utils import BreastCancerModel
+from ml.image_analysis import analyze_image
+from ml.nlp_utils import analyze_report
+from ml.predictive_models import predict_survival, predict_side_effects
 
 # Import patient app router
 from patient_app.router import patient_app_router
@@ -314,210 +318,13 @@ async def submit_symptoms(
 async def api_predict(file: UploadFile = File(...)) -> JSONResponse:
     data = await file.read()
     label, score = model.predict_label(data)
+    return JSONResponse({"label": label, "score": float(score)})
+
 @app.get("/ai-diagnostics", response_class=HTMLResponse)
 async def ai_diagnostics_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("ai_diagnostics.html", {"request": request})
 
 # AI Diagnostics API Endpoints
-from ml.image_analysis import analyze_image
-from ml.nlp_utils import analyze_report
-from ml.predictive_models import predict_survival, predict_side_effects
-import json
-
-@app.post("/api/analyze-image")
-async def api_analyze_image(file: UploadFile = File(...)) -> JSONResponse:
-    try:
-        data = await file.read()
-        result = analyze_image(data)
-        return JSONResponse(result)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-@app.post("/api/analyze-report")
-async def api_analyze_report(file: UploadFile = File(...)) -> JSONResponse:
-    try:
-        data = await file.read()
-        result = analyze_report(data)
-        return JSONResponse(result)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-@app.post("/api/predict-outcome")
-async def api_predict_outcome(request: Request) -> JSONResponse:
-    try:
-        body = await request.json()
-        result = predict_survival(int(body.get("age", 50)), int(body.get("stage", 1)), int(body.get("comorbidities", 0)))
-        return JSONResponse(result)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-@app.post("/api/predict-side-effects")
-async def api_predict_side_effects(request: Request) -> JSONResponse:
-    try:
-        body = await request.json()
-            if image_url:
-                doc["image_url"] = image_url
-            await db_cases.insert_one(doc)
-            
-            # Also store in patient_cases collection for patient dashboard
-            try:
-                db_patient_cases = db["patient_cases"] if db is not None else None
-                if db_patient_cases is not None:
-                    await db_patient_cases.insert_one({
-                        "patient_email": patient_email,
-                        "case_id": case_id,
-                        "risk_label": label,
-                        "risk_score": float(score),
-                        "image_url": image_url,
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Add timestamp
-                    })
-            except Exception as e:
-                print(f"Warning: Could not store case in patient_cases collection: {e}")
-        except Exception as e:
-            print(f"Warning: Could not store case in database: {e}")
-            # For this prototype we silently ignore DB errors and continue with in-memory storage
-            pass
-
-    return templates.TemplateResponse(
-        "pcp_result.html",
-        {
-            "request": request,
-            "patient_name": patient_name,
-            "patient_email": patient_email,
-            "risk_label": label,
-            "risk_score": score,
-            "case_id": case_id,
-            "image_url": image_url,
-        },
-    )
-
-
-# -------------------- Oncologist: Tele-Oncology Navigation (The "Help") ------
-
-@app.get("/oncologist", response_class=HTMLResponse)
-async def oncologist_dashboard(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse(
-        "oncologist_dashboard.html",
-        {"request": request, "cases": SCAN_CASES},
-    )
-
-
-@app.post("/oncologist/case/{case_id}/review")
-async def oncologist_review(case_id: int) -> RedirectResponse:
-    for c in SCAN_CASES:
-        if c.case_id == case_id:
-            c.status = "REVIEWED"
-            if db_cases is not None:
-                try:
-                    # mirror status update to Mongo
-                    await db_cases.update_one({"case_id": case_id}, {"$set": {"status": "REVIEWED"}})
-                except Exception:
-                    pass
-            break
-    return RedirectResponse(url="/oncologist", status_code=303)
-
-
-@app.post("/oncologist/clear")
-async def oncologist_clear() -> RedirectResponse:
-    """Clear all oncologist worklist cases and associated images.
-
-    This resets the in-memory worklist, removes any persisted cases in MongoDB,
-    and deletes uploaded image files for the current session.
-    """
-    # Delete associated image files from disk (best-effort)
-    for c in SCAN_CASES:
-        if getattr(c, "image_path", None):
-            try:
-                Path(c.image_path).unlink(missing_ok=True)
-            except Exception:
-                pass
-
-    SCAN_CASES.clear()
-    if db_cases is not None:
-        try:
-            await db_cases.delete_many({})
-        except Exception:
-            pass
-    return RedirectResponse(url="/oncologist", status_code=303)
-
-
-# -------------------- Patient: Symptom Monitoring (The "Cure" support) ------
-
-PATIENT_SYMPTOMS: List[dict] = []
-
-
-@app.get("/patient", response_class=HTMLResponse)
-async def patient_portal(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("patient_portal.html", {"request": request})
-
-
-# Add a new endpoint to view patient symptom history
-@app.get("/oncologist/patient-symptoms", response_class=HTMLResponse)
-async def view_patient_symptoms(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("patient_symptoms.html", {"request": request, "symptoms": PATIENT_SYMPTOMS})
-
-
-# Add a route to clear patient symptoms
-@app.post("/oncologist/patient-symptoms/clear", response_class=HTMLResponse)
-async def clear_patient_symptoms() -> RedirectResponse:
-    PATIENT_SYMPTOMS.clear()
-    if db_symptoms is not None:
-        try:
-            await db_symptoms.delete_many({})
-        except Exception:
-            pass
-    return RedirectResponse(url="/oncologist/patient-symptoms", status_code=303)
-
-
-@app.post("/patient/symptoms", response_class=HTMLResponse)
-async def submit_symptoms(
-    request: Request,
-    patient_name: str = Form(...),
-    nausea: int = Form(...),
-    fatigue: int = Form(...),
-    pain: int = Form(...),
-) -> HTMLResponse:
-    record = {
-        "patient_name": patient_name,
-        "nausea": nausea,
-        "fatigue": fatigue,
-        "pain": pain,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    PATIENT_SYMPTOMS.append(record)
-
-    # Mirror to MongoDB if configured (best-effort)
-    if db_symptoms is not None:
-        try:
-            await db_symptoms.insert_one(record)
-        except Exception:
-            pass
-
-    alert = None
-    if max(nausea, fatigue, pain) >= 4:
-        alert = "High symptom burden detected. Nurse should follow up."  # in real app, push alert
-
-    return templates.TemplateResponse(
-        "patient_thanks.html",
-        {"request": request, "alert": alert},
-    )
-
-
-# -------------------- Raw AI API endpoint (for future integration) ----------
-
-@app.post("/api/predict")
-async def api_predict(file: UploadFile = File(...)) -> JSONResponse:
-    data = await file.read()
-    label, score = model.predict_label(data)
-@app.get("/ai-diagnostics", response_class=HTMLResponse)
-async def ai_diagnostics_page(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("ai_diagnostics.html", {"request": request})
-
-# AI Diagnostics API Endpoints
-from ml.image_analysis import analyze_image
-from ml.nlp_utils import analyze_report
-from ml.predictive_models import predict_survival, predict_side_effects
-import json
 
 @app.post("/api/analyze-image")
 async def api_analyze_image(file: UploadFile = File(...)) -> JSONResponse:
