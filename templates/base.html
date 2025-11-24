@@ -76,7 +76,47 @@
       modal.style.display = 'block';
 
       // Reset content
-      content.innerHTML = '<p class="emergency-text">Locating your position and finding the nearest hospital...</p><div class="emergency-loader"></div><p style="text-align:center; margin-top:10px; font-size:0.9rem; color:#cbd5e1;">If this takes too long, check your location permissions.</p>';
+      content.innerHTML = '<p class="emergency-text">Finding nearest hospitals...</p><div class="emergency-loader"></div><p style="text-align:center; margin-top:10px; font-size:0.9rem; color:#cbd5e1;">Accessing emergency network...</p>';
+
+      function fetchHospitals(lat, lon) {
+        // Send location to backend to find nearest hospitals
+        // If lat/lon are null, backend will use mock data
+        fetch('/emergency-hospitals', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: lat,
+            longitude: lon
+          })
+        })
+          .then(response => {
+            // Check content type before parsing JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+              throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+            }
+
+            // Check if response is OK before parsing JSON
+            if (!response.ok) {
+              return response.json().then(errorData => {
+                throw new Error(errorData.error || 'Unknown error occurred');
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.error) {
+              throw new Error(data.error);
+            }
+            displayHospitals(data);
+          })
+          .catch(error => {
+            content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p><p class="emergency-error">Details: ' + error.message + '</p>';
+            console.error('Error:', error);
+          });
+      }
 
       // Check if geolocation is supported
       if (navigator.geolocation) {
@@ -84,88 +124,52 @@
           function (position) {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-
-            // Send location to backend to find nearest hospitals
-            fetch('/emergency-hospitals', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                latitude: lat,
-                longitude: lon
-              })
-            })
-              .then(response => {
-                // Check content type before parsing JSON
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                  throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
-                }
-
-                // Check if response is OK before parsing JSON
-                if (!response.ok) {
-                  return response.json().then(errorData => {
-                    throw new Error(errorData.error || 'Unknown error occurred');
-                  });
-                }
-                return response.json();
-              })
-              .then(data => {
-                if (data.error) {
-                  throw new Error(data.error);
-                }
-                displayHospitals(data);
-              })
-              .catch(error => {
-                content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p><p class="emergency-error">Details: ' + error.message + '</p>';
-                console.error('Error:', error);
-              });
+            fetchHospitals(lat, lon);
           },
           function (error) {
-            let errorMessage = 'Unable to get your location. ';
-            switch (error.code) {
-              case error.PERMISSION_DENIED:
-                errorMessage += 'Location access denied. Please enable location services.';
-                break;
-              case error.POSITION_UNAVAILABLE:
-                errorMessage += 'Location information is unavailable.';
-                break;
-              case error.TIMEOUT:
-                errorMessage += 'The request to get your location timed out.';
-                break;
-              default:
-                errorMessage += 'An unknown error occurred.';
-                break;
-            }
-            content.innerHTML = '<p class="emergency-error">' + errorMessage + '</p><p class="emergency-error">Error code: ' + error.code + '</p><button class="btn" onclick="document.getElementById(\'emergency-button\').click()" style="margin-top:1rem;">Try Again</button>';
-            console.error('Geolocation error:', error);
+            console.warn('Geolocation failed, falling back to default location:', error);
+            // Fallback to backend without location (will use mock data)
+            fetchHospitals(null, null);
           },
           {
-            timeout: 10000, // 10 seconds timeout
+            timeout: 5000, // 5 seconds timeout
             enableHighAccuracy: true,
             maximumAge: 0
           }
         );
       } else {
-        content.innerHTML = '<p class="emergency-error">Geolocation is not supported by your browser. Please call 1-800-CANCER immediately.</p>';
+        console.warn('Geolocation not supported, falling back to default location');
+        // Fallback to backend without location
+        fetchHospitals(null, null);
       }
     });
 
     // Display hospitals in the modal
     function displayHospitals(data) {
       const content = document.getElementById('emergency-content');
-      if (data.hospitals && data.hospitals.length > 0) {
+      if (data.features && data.features.length > 0) {
+        let html = '<div class="hospital-list">';
+        data.features.forEach(feature => {
+          const props = feature.properties;
+          html += `
+                <div class="hospital-card">
+                    <h3>${props.name || 'Hospital'}</h3>
+                    <p><strong>Distance:</strong> ${props.distance ? Math.round(props.distance) + ' m' : 'N/A'}</p>
+                    <p><strong>Address:</strong> ${props.address_line1 || ''} ${props.address_line2 || ''}</p>
+                </div>
+            `;
+        });
+        html += '</div>';
+        content.innerHTML = html;
+      } else if (data.hospitals && data.hospitals.length > 0) {
+        // Handle legacy format if backend returns it
         let html = '<div class="hospital-list">';
         data.hospitals.forEach(hospital => {
           html += `
                 <div class="hospital-card">
                     <h3>${hospital.name}</h3>
                     <p><strong>Distance:</strong> ${hospital.distance} km</p>
-                    <p><strong>Estimated Time:</strong> ${hospital.estimated_time} minutes</p>
                     <p><strong>Address:</strong> ${hospital.address}</p>
-                    <p><strong>Phone:</strong> ${hospital.phone}</p>
-                    <p><strong>Specialist:</strong> ${hospital.specialist_name}</p>
                 </div>
             `;
         });

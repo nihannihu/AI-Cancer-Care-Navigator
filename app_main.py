@@ -427,55 +427,6 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
             import traceback
             traceback.print_exc()
             return JSONResponse({"error": f"Unexpected error: {str(e)}"}, status_code=500)
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-# -------------------- Emergency Hospital Finder --------------------
-
-@app.post("/emergency-hospitals")
-async def emergency_hospitals(request: Request) -> JSONResponse:
-    try:
-        body = await request.json()
-        lat = body.get("latitude")
-        lon = body.get("longitude")
-        
-        if not lat or not lon:
-            return JSONResponse({"error": "Latitude and longitude required"}, status_code=400)
-            
-        # Fallback to mock data if API key is missing OR if API fails/returns no results
-        # We want to ensure the user ALWAYS gets hospitals in this demo
-        
-        if not GEOAPIFY_API_KEY:
-             return get_mock_hospitals_near_location(lat, lon)
-
-        # Search for hospitals within 10km
-        url = f"https://api.geoapify.com/v2/places?categories=healthcare.hospital,healthcare&filter=circle:{lon},{lat},10000&limit=10&apiKey={GEOAPIFY_API_KEY}"
-        
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url)
-            
-        if response.status_code != 200:
-            print(f"Geoapify API failed: {response.text}")
-            return get_mock_hospitals_near_location(lat, lon)
-            
-        data = response.json()
-        features = data.get("features", [])
-        
-        if not features:
-            print("No hospitals found via API, using mock data")
-            return get_mock_hospitals_near_location(lat, lon)
-            
-        return JSONResponse(data)
-    except Exception as e:
-        print(f"Error in emergency hospitals: {e}")
-        # Final fallback
-        return get_mock_hospitals_near_location(lat if 'lat' in locals() else 0, lon if 'lon' in locals() else 0)
-
-def get_mock_hospitals_near_location(lat, lon):
-    # Return realistic looking mock data structure matching Geoapify
-    return JSONResponse({
-        "features": [
-            {
                 "properties": {
                     "name": "City General Hospital (Emergency)",
                     "address_line1": "123 Medical Center Dr",
