@@ -4,6 +4,26 @@ const path = require('path');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 require('dotenv').config();
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+const AI_BACKEND_URL = process.env.AI_BACKEND_URL || 'http://localhost:8000';
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files
+app.use('/static', express.static(path.join(__dirname, 'static'), {
+  maxAge: '1d',
+  etag: false
+}));
+
+// Proxy uploaded images to Python backend
+app.use('/static/uploads', createProxyMiddleware({
+  target: AI_BACKEND_URL,
+  changeOrigin: true,
+  secure: false,
+}));
 
 // Proxy API requests to Python backend
 // Core app pages
