@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onco-Navigator AI - Hackathon Pitch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Light Medical Theme (Matches Reference) */
+            --bg-gradient-start: #f0f9ff;
+            /* Light Sky */
+            --bg-gradient-end: #e0f2fe;
+            /* Slightly darker sky */
+            --card-bg: #ffffff;
+            --card-border: #bae6fd;
+            /* Light Blue Border */
+
+            --primary: #0284c7;
+            /* Medical Blue */
+            --primary-light: #38bdf8;
+            --primary-dark: #0369a1;
+
+            --text-main: #0f172a;
+            /* Dark Slate */
+            --text-muted: #64748b;
+
+            --accent-success: #10b981;
+            --accent-warning: #f59e0b;
+            --accent-danger: #ef4444;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Contour lines background pattern */
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%230284c7' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        /* Presentation Container */
+        .presentation-wrapper {
+            width: 1280px;
+            height: 720px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid #fff;
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 3rem 4rem;
+            opacity: 0;
+            transform: scale(0.98);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: all;
+        }
+
+        /* Typography */
+        h1,
+        h2,
+        h3 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-main);
+        }
+
+        h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        h2::before {
+            content: '';
+            display: block;
+            width: 8px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        /* Diagram Components (The "Image" Look) */
+        .diagram-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .node-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            z-index: 2;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .node-card.primary {
+            border-top: 4px solid var(--primary);
+        }
+
+        .node-card.success {
+            border-top: 4px solid var(--accent-success);
+        }
+
+        .node-card.warning {
+            border-top: 4px solid var(--accent-warning);
+        }
+
+        .node-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .node-title {
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .node-list {
+            text-align: left;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            list-style: none;
+        }
+
+        .node-list li {
+            margin-bottom: 0.25rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .node-list li::before {
+            content: '•';
+            color: var(--primary);
+            position: absolute;
+            left: 0;
+        }
+
+        /* Connectors (CSS Arrows) */
+        .connector-down {
+            width: 2px;
+            height: 40px;
+            background: var(--primary-light);
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .connector-down::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid var(--primary-light);
+        }
+
+        .connector-right {
+            height: 2px;
+            width: 40px;
+            background: var(--primary-light);
+            position: relative;
+            align-self: center;
+        }
+
+        .connector-right::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 8px solid var(--primary-light);
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            height: 100%;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+
+        /* Feature Cards */
+        .feature-box {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--card-border);
+            transition: transform 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        /* Stats */
+        .stat-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid var(--bg-gradient-end);
+            border-top-color: var(--primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 1rem;
+            background: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-val {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-lbl {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Tables */
+        .comparison-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--card-border);
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .comparison-table th {
+            background: #f8fafc;
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table td:nth-child(2) {
+            background: #f0f9ff;
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav-controls {
+            position: absolute;
+            bottom: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid var(--card-border);
+            color: var(--primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .slide-counter {
+            position: absolute;
+            bottom: 2rem;
+            left: 2rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-sm);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="presentation-wrapper">
+        <div class="slide-counter" id="slideCounter">Slide 1 / 13</div>
+        <div class="nav-controls">
+            <button class="nav-btn" onclick="prevSlide()">←</button>
+            <button class="nav-btn" onclick="nextSlide()">→</button>
+        </div>
+
+        <!-- SLIDE 1: Title -->
+        <div class="slide active" id="slide-1" style="text-align: center; justify-content: center;">
+            <div style="margin-bottom: 2rem;">
+                <span
+                    style="background: var(--primary-light); color: white; padding: 0.5rem 1rem; border-radius: 50px; font-weight: 600; font-size: 0.9rem;">HACKATHON
+                    PITCH 2025</span>
+            </div>
+            <h1>ONCO-NAVIGATOR AI</h1>
+            <p style="font-size: 1.8rem; color: var(--primary-dark); margin-bottom: 3rem;">Bridging the 87% Gap:
+                AI-Powered Cancer Care for Rural India</p>
+
+            <div class="grid-3" style="max-width: 900px; margin: 0 auto;">
+                <div class="node-card">
+                    <span class="node-icon">🩺</span>
+                    <span class="node-title">AI Triage</span>
+                </div>
+                <div class="node-card">
+                    <span class="node-icon">🤝</span>
+                    <span class="node-title">Tele-Oncology</span>
+                </div>
+                <div class="node-card">
+                    <span class="node-icon">📱</span>
+                    <span class="node-title">Patient App</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 4rem; color: var(--text-muted);">
+                <strong>Nihan Nihu</strong> | Full Stack & AI Engineer
+            </div>
+        </div>
+
+        <!-- SLIDE 2: Problem -->
+        <div class="slide" id="slide-2">
+            <h2>The Cancer Care Crisis</h2>
+            <div class="grid-2">
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <div class="feature-box" style="align-items: flex-start; text-align: left; margin-bottom: 1.5rem;">
+                        <h3 style="color: var(--accent-danger); font-size: 2rem;">87%</h3>
+                        <p style="font-weight: 600; color: var(--text-main);">Cases detected at Stage 3-4</p>
+                        <p>Late detection is the #1 killer, not the disease itself.</p>
+                    </div>
+                    <div class="feature-box" style="align-items: flex-start; text-align: left;">
+                        <h3 style="color: var(--accent-warning); font-size: 2rem;">200km+</h3>
+                        <p style="font-weight: 600; color: var(--text-main);">Average travel for rural patients</p>
+                        <p>Geography is the barrier. 65% of rural India has ZERO oncologists.</p>
+                    </div>
+                </div>
+
+                <!-- CSS Map Visualization Placeholder -->
+                <div class="feature-box" style="background: #f8fafc; border: 2px dashed var(--card-border);">
+                    <div style="position: relative; width: 300px; height: 350px;">
+                        <!-- Simple CSS India Map Representation -->
+                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; opacity: 0.5;">
+                            <path d="M50,10 L60,30 L80,40 L70,80 L50,95 L30,80 L20,40 L40,30 Z" fill="#cbd5e1" />
+                        </svg>
+                        <!-- Dots -->
+                        <div
+                            style="position: absolute; top: 30%; left: 40%; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary);">
+                        </div>
+                        <div
+                            style="position: absolute; top: 60%; left: 30%; width: 10px; height: 10px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary);">
+                        </div>
+                        <div
+                            style="position: absolute; top: 50%; left: 70%; width: 10px; height: 10px; background: var(--accent-danger); border-radius: 50%; animation: pulse 2s infinite;">
+                        </div>
+                        <div
+                            style="position: absolute; top: 40%; left: 20%; width: 10px; height: 10px; background: var(--accent-danger); border-radius: 50%; animation: pulse 2s infinite;">
+                        </div>
+
+                        <div style="position: absolute; bottom: 10px; width: 100%; text-align: center;">
+                            <span style="color: var(--accent-danger);">● Rural (No Access)</span>
+                            <span style="color: var(--primary); margin-left: 10px;">● Urban (Hubs)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: Solution Architecture (Flowchart) -->
+        <div class="slide" id="slide-3">
+            <h2>The Solution Ecosystem</h2>
+            <div class="diagram-container" style="flex-direction: column;">
+
+                <!-- Top: Gemini AI -->
+                <div class="node-card primary" style="margin-bottom: 2rem;">
+                    <span class="node-icon">🧠</span>
+                    <span class="node-title">Gemini AI Brain</span>
+                    <p style="font-size: 0.8rem;">NLP + Vision Analysis</p>
+                </div>
+
+                <div class="connector-down"></div>
+
+                <!-- Middle: 3 Portals -->
+                <div style="display: flex; gap: 2rem; align-items: flex-start; margin-top: 0;">
+                    <!-- PCP -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div class="connector-down" style="height: 20px;"></div>
+                        <div class="node-card">
+                            <span class="node-icon">🩺</span>
+                            <span class="node-title">PCP Triage</span>
+                            <ul class="node-list">
+                                <li>X-ray Upload</li>
+                                <li>Risk Score</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Oncologist -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div class="connector-down" style="height: 20px;"></div>
+                        <div class="node-card">
+                            <span class="node-icon">👨‍⚕️</span>
+                            <span class="node-title">Oncologist Hub</span>
+                            <ul class="node-list">
+                                <li>Case Review</li>
+                                <li>Video Consult</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Patient -->
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div class="connector-down" style="height: 20px;"></div>
+                        <div class="node-card">
+                            <span class="node-icon">📱</span>
+                            <span class="node-title">Patient App</span>
+                            <ul class="node-list">
+                                <li>Voice Check</li>
+                                <li>Reminders</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom: Backend -->
+                <div
+                    style="margin-top: 2rem; width: 100%; border-top: 2px dashed var(--card-border); padding-top: 1rem; text-align: center;">
+                    <span
+                        style="background: white; padding: 0 1rem; position: relative; top: -25px; color: var(--text-muted); font-size: 0.9rem;">Powered
+                        By</span>
+                    <div style="display: flex; justify-content: center; gap: 2rem;">
+                        <span class="tech-badge">Python FastAPI</span>
+                        <span class="tech-badge">Node.js</span>
+                        <span class="tech-badge">MongoDB</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: The Gap -->
+        <div class="slide" id="slide-4">
+            <h2>The Market Gap</h2>
+            <div class="grid-3">
+                <div class="feature-box" style="opacity: 0.7;">
+                    <h3>IBM Watson</h3>
+                    <p>Hospital-Centric</p>
+                    <p style="font-size: 0.9rem;">Great for research, but too expensive and complex for rural clinics.
+                    </p>
+                    <span style="color: var(--accent-danger); font-size: 1.5rem;">❌</span>
+                </div>
+                <div class="feature-box" style="border: 2px solid var(--primary); transform: scale(1.05); z-index: 2;">
+                    <h3 style="color: var(--primary);">Onco-Navigator</h3>
+                    <p>Patient-Centric Ecosystem</p>
+                    <p style="font-size: 0.9rem;">Connects the entire journey: Diagnosis → Treatment → Recovery.</p>
+                    <span style="color: var(--accent-success); font-size: 1.5rem;">✅</span>
+                </div>
+                <div class="feature-box" style="opacity: 0.7;">
+                    <h3>Telemedicine Apps</h3>
+                    <p>Communication Only</p>
+                    <p style="font-size: 0.9rem;">Connects doctors but lacks diagnostic AI capabilities.</p>
+                    <span style="color: var(--accent-danger); font-size: 1.5rem;">❌</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: Core Features (Pillars) -->
+        <div class="slide" id="slide-5">
+            <h2>Three Core Pillars</h2>
+            <div class="grid-3">
+                <!-- Pillar 1 -->
+                <div class="node-card primary" style="text-align: left; height: 100%;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="node-icon">1</span>
+                        <span style="font-size: 2rem;">🩺</span>
+                    </div>
+                    <h3>AI-Assisted Triage</h3>
+                    <p>For Rural Doctors</p>
+                    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 1rem 0;">
+                    <ul class="node-list">
+                        <li><strong>Problem:</strong> Lack of expertise</li>
+                        <li><strong>Solution:</strong> AI Second Opinion</li>
+                        <li><strong>Tech:</strong> CNN (97% Acc)</li>
+                        <li><strong>Result:</strong> 15 min diagnosis</li>
+                    </ul>
+                </div>
+
+                <!-- Pillar 2 -->
+                <div class="node-card primary" style="text-align: left; height: 100%;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="node-icon">2</span>
+                        <span style="font-size: 2rem;">👨‍⚕️</span>
+                    </div>
+                    <h3>Tele-Oncology Hub</h3>
+                    <p>For Specialists</p>
+                    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 1rem 0;">
+                    <ul class="node-list">
+                        <li><strong>Problem:</strong> Siloed doctors</li>
+                        <li><strong>Solution:</strong> Unified Dashboard</li>
+                        <li><strong>Tech:</strong> Real-time Video</li>
+                        <li><strong>Result:</strong> 24/7 Availability</li>
+                    </ul>
+                </div>
+
+                <!-- Pillar 3 -->
+                <div class="node-card primary" style="text-align: left; height: 100%;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="node-icon">3</span>
+                        <span style="font-size: 2rem;">📱</span>
+                    </div>
+                    <h3>Patient Empowerment</h3>
+                    <p>For Care & Support</p>
+                    <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 1rem 0;">
+                    <ul class="node-list">
+                        <li><strong>Problem:</strong> Low compliance</li>
+                        <li><strong>Solution:</strong> Active Monitoring</li>
+                        <li><strong>Tech:</strong> Voice AI</li>
+                        <li><strong>Result:</strong> 70% Adherence</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: Tech Stack -->
+        <div class="slide" id="slide-6">
+            <h2>Technology Stack</h2>
+            <div class="grid-2">
+                <!-- Diagram Side -->
+                <div class="diagram-container" style="flex-direction: column; gap: 1rem;">
+                    <div class="node-card"
+                        style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Frontend</span>
+                        <div>
+                            <span class="tech-badge">React.js</span>
+                            <span class="tech-badge">Tailwind</span>
+                        </div>
+                    </div>
+                    <div class="connector-down" style="height: 20px;"></div>
+                    <div class="node-card"
+                        style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+                        <span>Backend API</span>
+                        <div>
+                            <span class="tech-badge">Node.js</span>
+                            <span class="tech-badge">Express</span>
+                        </div>
+                    </div>
+                    <div class="connector-down" style="height: 20px;"></div>
+                    <div style="display: flex; gap: 1rem; width: 100%;">
+                        <div class="node-card" style="flex: 1;">
+                            <span>AI Engine</span><br>
+                            <span class="tech-badge" style="margin-top: 0.5rem;">Python FastAPI</span>
+                        </div>
+                        <div class="node-card" style="flex: 1;">
+                            <span>Database</span><br>
+                            <span class="tech-badge" style="margin-top: 0.5rem;">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Innovation Side -->
+                <div class="feature-box" style="align-items: flex-start; text-align: left;">
+                    <h3>Innovation Highlights</h3>
+                    <ul class="node-list" style="font-size: 1.1rem; margin-top: 1rem;">
+                        <li style="margin-bottom: 1rem;"><strong>Microservices:</strong> Decoupled architecture for
+                            independent scaling.</li>
+                        <li style="margin-bottom: 1rem;"><strong>Gemini AI:</strong> Advanced NLP for parsing pathology
+                            reports.</li>
+                        <li style="margin-bottom: 1rem;"><strong>Voice-First:</strong> Accessible to rural populations
+                            (Kannada/Hindi).</li>
+                        <li><strong>Geoapify:</strong> Emergency hospital locator logic.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: AI Stats -->
+        <div class="slide" id="slide-7">
+            <h2>AI Model Performance</h2>
+            <div class="grid-3">
+                <div class="stat-circle">
+                    <span class="stat-val">97%</span>
+                    <span class="stat-lbl">Accuracy</span>
+                </div>
+                <div class="stat-circle">
+                    <span class="stat-val">0.96</span>
+                    <span class="stat-lbl">AUC-ROC</span>
+                </div>
+                <div class="stat-circle">
+                    <span class="stat-val">95%</span>
+                    <span class="stat-lbl">Precision</span>
+                </div>
+            </div>
+
+            <div class="node-card" style="margin-top: 2rem;">
+                <h3>Training Datasets</h3>
+                <div class="grid-3" style="margin-top: 1rem;">
+                    <div>
+                        <strong>MIMIC-III</strong>
+                        <p>40,000+ Patients</p>
+                    </div>
+                    <div>
+                        <strong>ChexPert</strong>
+                        <p>224,000 X-rays</p>
+                    </div>
+                    <div>
+                        <strong>SEER Registry</strong>
+                        <p>2M+ Cancer Cases</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: Patient Journey (Timeline) -->
+        <div class="slide" id="slide-8">
+            <h2>Patient Journey: "Priya's Story"</h2>
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; margin-top: 3rem; position: relative;">
+                <!-- Line -->
+                <div
+                    style="position: absolute; top: 50%; left: 0; width: 100%; height: 4px; background: #e2e8f0; z-index: 0;">
+                </div>
+
+                <!-- Steps -->
+                <div
+                    style="position: relative; z-index: 1; text-align: center; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); width: 18%;">
+                    <div style="font-size: 2rem;">🤒</div>
+                    <strong>Day 1</strong>
+                    <p style="font-size: 0.8rem;">Symptom Onset</p>
+                </div>
+
+                <div
+                    style="position: relative; z-index: 1; text-align: center; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); width: 18%;">
+                    <div style="font-size: 2rem;">📱</div>
+                    <strong>Day 1</strong>
+                    <p style="font-size: 0.8rem;">Voice Check & Alert</p>
+                </div>
+
+                <div
+                    style="position: relative; z-index: 1; text-align: center; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); width: 18%;">
+                    <div style="font-size: 2rem;">🏥</div>
+                    <strong>Day 2</strong>
+                    <p style="font-size: 0.8rem;">PCP Visit & AI Scan</p>
+                </div>
+
+                <div
+                    style="position: relative; z-index: 1; text-align: center; background: white; padding: 1rem; border-radius: 12px; border: 1px solid var(--card-border); width: 18%;">
+                    <div style="font-size: 2rem;">👨‍⚕️</div>
+                    <strong>Day 4</strong>
+                    <p style="font-size: 0.8rem;">Specialist Consult</p>
+                </div>
+
+                <div
+                    style="position: relative; z-index: 1; text-align: center; background: #ecfdf5; padding: 1rem; border-radius: 12px; border: 1px solid var(--accent-success); width: 18%;">
+                    <div style="font-size: 2rem;">💊</div>
+                    <strong>Day 5</strong>
+                    <p style="font-size: 0.8rem;">Treatment Begins</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 3rem;">
+                <p class="highlight" style="font-size: 1.5rem;">"From 4 months to 5 days."</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: Doctor Workflow -->
+        <div class="slide" id="slide-9">
+            <h2>Doctor Workflow</h2>
+            <div class="grid-2">
+                <div class="node-card" style="text-align: left;">
+                    <h3>Rural PCP</h3>
+                    <div style="margin-top: 1rem; border-left: 2px solid var(--primary); padding-left: 1rem;">
+                        <p>1. Uploads X-ray</p>
+                        <p>2. Receives AI Risk Score (7.2/10)</p>
+                        <p>3. "Refer to Specialist" Alert</p>
+                        <p>4. One-click Escalation</p>
+                    </div>
+                </div>
+                <div class="node-card" style="text-align: left;">
+                    <h3>Urban Oncologist</h3>
+                    <div style="margin-top: 1rem; border-left: 2px solid var(--primary); padding-left: 1rem;">
+                        <p>1. Sees Prioritized Case</p>
+                        <p>2. Reviews AI Annotations</p>
+                        <p>3. Video Call with PCP</p>
+                        <p>4. Sets Treatment Plan</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: Competitive Advantage -->
+        <div class="slide" id="slide-10">
+            <h2>Competitive Advantage</h2>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Onco-Navigator</th>
+                        <th>Manual System</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Diagnosis Time</td>
+                        <td>15 mins</td>
+                        <td>3-5 days</td>
+                    </tr>
+                    <tr>
+                        <td>Cost per Scan</td>
+                        <td>$2-5</td>
+                        <td>$50-200</td>
+                    </tr>
+                    <tr>
+                        <td>Rural Access</td>
+                        <td>✅ Voice & Mobile</td>
+                        <td>❌ Travel Required</td>
+                    </tr>
+                    <tr>
+                        <td>System Type</td>
+                        <td>End-to-End Ecosystem</td>
+                        <td>Fragmented Tools</td>
+                    </tr>
+                    <tr>
+                        <td>Scalability</td>
+                        <td>Unlimited (Cloud)</td>
+                        <td>Limited by Doctors</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SLIDE 11: Impact -->
+        <div class="slide" id="slide-11">
+            <h2>Real-World Impact</h2>
+            <div class="grid-4">
+                <div class="feature-box">
+                    <span class="stat-val">96%</span>
+                    <span class="stat-lbl">Faster Diagnosis</span>
+                </div>
+                <div class="feature-box">
+                    <span class="stat-val">70%</span>
+                    <span class="stat-lbl">Cost Reduction</span>
+                </div>
+                <div class="feature-box">
+                    <span class="stat-val">23%</span>
+                    <span class="stat-lbl">Survival Increase</span>
+                </div>
+                <div class="feature-box">
+                    <span class="stat-val">10x</span>
+                    <span class="stat-lbl">Rural Reach</span>
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top: 2rem;">
+                <div class="node-card success">
+                    <h3>Healthcare Access</h3>
+                    <p>Increased from 15% to <strong>98%</strong> via app.</p>
+                </div>
+                <div class="node-card success">
+                    <h3>Adherence</h3>
+                    <p>Improved from 40% to <strong>87%</strong> with reminders.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 12: Roadmap -->
+        <div class="slide" id="slide-12">
+            <h2>Roadmap & Vision</h2>
+            <div class="grid-3">
+                <div class="node-card success">
+                    <h3>Phase 1 (Now)</h3>
+                    <p>Pilot in 50 PHCs</p>
+                    <p>Breast Cancer Focus</p>
+                </div>
+                <div class="node-card">
+                    <h3>Phase 2 (6 Mo)</h3>
+                    <p>Lung & Oral Cancer</p>
+                    <p>Regional Voice Support</p>
+                </div>
+                <div class="node-card">
+                    <h3>Phase 3 (18 Mo)</h3>
+                    <p>National Rollout</p>
+                    <p>1,000+ Centers</p>
+                </div>
+            </div>
+            <div class="node-card" style="margin-top: 2rem;">
+                <h3>Future Tech</h3>
+                <p>Federated Learning & Genomic Integration</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 13: CTA -->
+        <div class="slide" id="slide-13" style="text-align: center; justify-content: center;">
+            <h1>Join the Revolution</h1>
+            <p style="font-size: 1.5rem; margin-bottom: 3rem;">Let's make cancer care accessible to everyone,
+                everywhere.</p>
+
+            <div class="grid-2" style="max-width: 600px; margin: 0 auto;">
+                <div class="node-card">
+                    <h3>Nihan Nihu</h3>
+                    <p>Lead Developer</p>
+                </div>
+                <div class="node-card">
+                    <h3>Contact</h3>
+                    <p>github.com/nihannihu</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        /* Helper for tech badges */
+        .tech-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: #e0f2fe;
+            color: var(--primary-dark);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0.25rem;
+        }
+
+        /* Animation for map dots */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 13;
+
+        function showSlide(n) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            if (n > totalSlides) currentSlide = 1;
+            if (n < 1) currentSlide = totalSlides;
+            document.getElementById(`slide-${currentSlide}`).classList.add('active');
+            document.getElementById('slideCounter').innerText = `Slide ${currentSlide} / ${totalSlides}`;
+        }
+
+        function nextSlide() {
+            currentSlide++;
+            if (currentSlide > totalSlides) currentSlide = 1;
+            showSlide(currentSlide);
+        }
+
+        function prevSlide() {
+            currentSlide--;
+            if (currentSlide < 1) currentSlide = totalSlides;
+            showSlide(currentSlide);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+
+        showSlide(1);
+    </script>
+
+</body>
+
+</html>

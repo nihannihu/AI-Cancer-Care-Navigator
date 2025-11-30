@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Patient Login - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+    <section class="surface-panel fade-in-up" style="max-width: 500px; margin: 2rem auto;">
+        <h1 class="surface-title" style="text-align: center; margin-bottom: 2rem;">Patient Login</h1>
+
+        <form id="loginForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="username" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;" />
+            </div>
+
+            <div class="form-group">
+                <label for="password" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;" />
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                Login to Dashboard
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+            <p style="margin-bottom: 1rem; color: #64748b;">Don't have an account?</p>
+            <a href="/patient/register-page" class="btn btn-secondary" style="display: inline-block;">
+                Create New Account
+            </a>
+        </div>
+
+        <div id="error-message"
+            style="display: none; margin-top: 1rem; padding: 1rem; background: #fee; border: 2px solid #fcc; border-radius: 8px; color: #c00;">
+        </div>
+    </section>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.style.display = 'none';
+
+        // Add loading animation to the login button
+        const loginBtn = document.querySelector('#loginForm button[type="submit"]');
+        if (loginBtn) {
+            loginBtn.classList.add('loading');
+        }
+
+        const formData = new FormData(e.target);
+
+        try {
+            const response = await fetch('/patient/login', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('token', data.access_token);
+                window.location.href = '/patient/dashboard-page';
+            } else {
+                const error = await response.json();
+                errorDiv.textContent = error.detail || 'Login failed. Please check your credentials.';
+                errorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            errorDiv.textContent = 'An error occurred. Please try again.';
+            errorDiv.style.display = 'block';
+        } finally {
+            // Remove loading animation
+            if (loginBtn) {
+                loginBtn.classList.remove('loading');
+            }
+        }
+    });
+</script>
+{% endblock %}

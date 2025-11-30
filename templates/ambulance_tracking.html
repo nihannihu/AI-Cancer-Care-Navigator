@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Ambulance Tracking - Onco-Navigator{% endblock %}
+
+{% block content %}
+<div class="ambulance-container">
+    <div class="status-card">
+        <div class="status-header">
+            <div class="status-indicator">
+                <span class="pulse-dot"></span>
+                <h2 id="status-text">Searching for Ambulance...</h2>
+            </div>
+            <div class="priority-badge" id="priority-badge">
+                Priority 1: High Risk
+            </div>
+        </div>
+
+        <div class="map-container" id="map"></div>
+
+        <div class="trip-details">
+            <div class="detail-item">
+                <span class="label">Destination</span>
+                <strong id="hospital-name">Finding nearest oncology center...</strong>
+            </div>
+            <div class="detail-item">
+                <span class="label">ETA</span>
+                <strong id="eta-text">-- min</strong>
+            </div>
+            <div class="detail-item">
+                <span class="label">Vehicle</span>
+                <strong id="vehicle-info">Assigning...</strong>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <a href="tel:919845325913" id="call-driver-btn" class="btn btn-secondary"
+                style="background-color: #ef4444; color: white; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                📞 Call Driver
+            </a>
+            <a href="https://api.whatsapp.com/send?phone=919845325913&text=Hello,%20I%20need%20to%20contact%20the%20ambulance%20driver."
+                target="_blank" class="btn"
+                style="background-color: #25D366; color: white; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 0.75rem 1rem; border-radius: 0.5rem; font-weight: 600;">
+                💬 WhatsApp
+            </a>
+            <button onclick="shareLiveLocation()" class="btn btn-primary"
+                style="display: flex; align-items: center; justify-content: center; gap: 5px;">
+                📍 Share Location
+            </button>
+        </div>
+    </div>
+
+    <div class="timeline-card">
+        <h3>Live Updates</h3>
+        <ul class="timeline" id="timeline-events">
+            <!-- Events will be added here -->
+        </ul>
+    </div>
+</div>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    .ambulance-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .status-card,
+    .timeline-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .status-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .pulse-dot {
+        width: 12px;
+        height: 12px;
+        background-color: #ef4444;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+        }
+
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        }
+
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+        }
+    }
+
+    .priority-badge {
+        background: rgba(239, 68, 68, 0.2);
+        color: #fca5a5;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .map-container {
+        height: 300px;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        z-index: 1;
+    }
+
+    .trip-details {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .label {
+        font-size: 0.875rem;
+        color: #94a3b8;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .timeline {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .timeline li {
+        position: relative;
+        padding-left: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-left: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .timeline li:last-child {
+        border-left: none;
+    }
+
+    .timeline li::before {
+        content: '';
+        position: absolute;
+        left: -5px;
+        top: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.5);
+    }
+
+    .timeline-time {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin-bottom: 0.25rem;
+    }
+</style>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Initialize map
+    const map = L.map('map').setView([20.5937, 78.9629], 5); // Default to India center
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Icons
+    const ambulanceIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/2636/2636282.png', // Free ambulance icon
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+
+    const hospitalIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/4320/4320371.png', // Free hospital icon
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+
+    // Get tracking data from URL params or backend
+    const urlParams = new URLSearchParams(window.location.search);
+    const lat = parseFloat(urlParams.get('lat'));
+    const lng = parseFloat(urlParams.get('lng'));
+    const hospitalName = urlParams.get('hospital');
+    const hospitalLat = parseFloat(urlParams.get('h_lat'));
+    const hospitalLng = parseFloat(urlParams.get('h_lng'));
+
+    if (lat && lng) {
+        map.setView([lat, lng], 13);
+        L.marker([lat, lng]).addTo(map).bindPopup('You are here').openPopup();
+
+        if (hospitalLat && hospitalLng) {
+            L.marker([hospitalLat, hospitalLng], { icon: hospitalIcon })
+                .addTo(map)
+                .bindPopup(hospitalName || 'Destination Hospital');
+
+            // Draw route line (straight line for now)
+            L.polyline([[lat, lng], [hospitalLat, hospitalLng]], { color: 'red', dashArray: '10, 10' }).addTo(map);
+
+            // Fit bounds
+            map.fitBounds([[lat, lng], [hospitalLat, hospitalLng]], { padding: [50, 50] });
+        }
+    }
+
+    // Mock Status Updates
+    const statuses = [
+        { text: "Searching for nearest ambulance...", delay: 0 },
+        { text: "Ambulance Assigned (KA-01-EQ-108)", delay: 3000, vehicle: "Advanced Life Support (ALS)" },
+        { text: "Driver dispatched: Ramesh Kumar", delay: 6000 },
+        { text: "On the way - 8 mins away", delay: 10000 }
+    ];
+
+    const timeline = document.getElementById('timeline-events');
+    const statusText = document.getElementById('status-text');
+    const vehicleInfo = document.getElementById('vehicle-info');
+
+    if (hospitalName) {
+        document.getElementById('hospital-name').innerText = hospitalName;
+    }
+
+    statuses.forEach(status => {
+        setTimeout(() => {
+            statusText.innerText = status.text;
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <div class="timeline-time">${new Date().toLocaleTimeString()}</div>
+                <div>${status.text}</div>
+            `;
+            timeline.prepend(li);
+
+            if (status.vehicle) {
+                vehicleInfo.innerText = status.vehicle;
+            }
+        }, status.delay);
+    });
+
+    function shareLiveLocation() {
+        if (navigator.share) {
+            navigator.share({
+                title: 'Emergency Tracking',
+                text: 'Track my ambulance status here:',
+                url: window.location.href
+            });
+        } else {
+            alert('Link copied to clipboard!');
+            navigator.clipboard.writeText(window.location.href);
+        }
+    }
+
+    // Call Driver Smart Handler
+    document.getElementById('call-driver-btn').addEventListener('click', function (e) {
+        // Check if device is likely mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            // Allow default behavior (open dialer)
+            return;
+        }
+
+        // On desktop/laptop, simulate the call to avoid errors
+        e.preventDefault();
+        alert('Simulating call to Ambulance Driver (9845325913)... \n\n(On a mobile device, this would open your phone dialer.)');
+    });
+</script>
+{% endblock %}

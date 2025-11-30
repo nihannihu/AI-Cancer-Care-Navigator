@@ -1,0 +1,614 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard - Onco-Navigator AI{% endblock %}
+{% block content %}
+
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        display: flex;
+        min-height: calc(100vh - 80px);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 0;
+    }
+
+    /* Sidebar */
+    .dashboard-sidebar {
+        width: 280px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 2rem 0;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-nav-item {
+        margin: 0.5rem 1rem;
+    }
+
+    .sidebar-nav-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        color: #4a5568;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .sidebar-nav-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateX(5px);
+    }
+
+    .sidebar-nav-link.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .sidebar-nav-icon {
+        margin-right: 0.75rem;
+        font-size: 1.2rem;
+    }
+
+    /* Main Content */
+    .dashboard-main {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .dashboard-header {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+    }
+
+    .dashboard-subtitle {
+        color: #718096;
+        margin-top: 0.5rem;
+    }
+
+    /* Cards */
+    .dashboard-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .card-header-custom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .card-title-custom {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin: 0;
+    }
+
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    /* Timeline */
+    .timeline-item {
+        padding: 1rem;
+        border-left: 3px solid #667eea;
+        margin-bottom: 1rem;
+        background: #f7fafc;
+        border-radius: 0 8px 8px 0;
+        transition: all 0.3s ease;
+    }
+
+    .timeline-item:hover {
+        background: #edf2f7;
+        border-left-color: #764ba2;
+    }
+
+    .timeline-date {
+        font-weight: 600;
+        color: #667eea;
+        font-size: 0.9rem;
+    }
+
+    .timeline-type {
+        font-weight: 500;
+        color: #2d3748;
+        margin-top: 0.25rem;
+    }
+
+    .timeline-details {
+        color: #718096;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Insights */
+    .insight-metric {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #f7fafc;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .insight-label {
+        font-weight: 500;
+        color: #4a5568;
+    }
+
+    .insight-value {
+        font-weight: 700;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .next-steps-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .next-steps-list li {
+        padding: 0.75rem;
+        background: #f7fafc;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        padding-left: 2.5rem;
+        position: relative;
+    }
+
+    .next-steps-list li:before {
+        content: "✓";
+        position: absolute;
+        left: 1rem;
+        color: #667eea;
+        font-weight: 700;
+    }
+
+    /* QR Code */
+    .qr-container {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .qr-code-img {
+        max-width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Chat */
+    .chat-container {
+        background: white;
+        border-radius: 16px;
+        height: 600px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+    }
+
+    .chat-message {
+        margin-bottom: 1rem;
+        display: flex;
+    }
+
+    .chat-message.user {
+        justify-content: flex-end;
+    }
+
+    .chat-bubble {
+        max-width: 70%;
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
+        word-wrap: break-word;
+    }
+
+    .chat-bubble.user {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .chat-bubble.bot {
+        background: #f7fafc;
+        color: #2d3748;
+        border-bottom-left-radius: 4px;
+    }
+
+    .chat-input-container {
+        padding: 1.5rem;
+        border-top: 2px solid #e2e8f0;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .chat-input {
+        flex: 1;
+        padding: 0.75rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .chat-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .chat-send-btn {
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .chat-send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Lab Reports */
+    .upload-area {
+        border: 3px dashed #cbd5e0;
+        border-radius: 16px;
+        padding: 3rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .upload-area:hover {
+        border-color: #667eea;
+        background: #f7fafc;
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .upload-text {
+        color: #4a5568;
+        font-weight: 500;
+    }
+
+    .analyze-btn {
+        margin-top: 1.5rem;
+        padding: 0.75rem 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .analyze-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Medicine */
+    .medicine-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .medicine-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .medicine-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .medicine-dosage {
+        color: #718096;
+        margin-bottom: 1rem;
+    }
+
+    .medicine-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .medicine-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            flex-direction: column;
+        }
+
+        .dashboard-sidebar {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link active" onclick="showSection('dashboard'); return false;">
+                    <span class="sidebar-nav-icon">📊</span>
+                    Dashboard
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="showSection('chat'); return false;">
+                    <span class="sidebar-nav-icon">💬</span>
+                    Chatbot & Booking
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="showSection('lab'); return false;">
+                    <span class="sidebar-nav-icon">🔬</span>
+                    Lab Reports
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="showSection('medicine'); return false;">
+                    <span class="sidebar-nav-icon">💊</span>
+                    Medicine Tracker
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Smart EHR Dashboard</h1>
+                <p class="dashboard-subtitle">Your personalized health insights and medical timeline</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <!-- Timeline Card -->
+                <div class="dashboard-card">
+                    <div class="card-header-custom">
+                        <h2 class="card-title-custom">Medical Timeline</h2>
+                        <div class="card-icon">📅</div>
+                    </div>
+                    <div id="timeline-container">Loading...</div>
+                </div>
+
+                <!-- QR Code Card -->
+                <div class="dashboard-card">
+                    <div class="card-header-custom">
+                        <h2 class="card-title-custom">My QR Code</h2>
+                        <div class="card-icon">📱</div>
+                    </div>
+                    <div class="qr-container">
+                        <img id="qr-code-img" class="qr-code-img" alt="Patient QR Code">
+                        <p style="margin-top: 1rem; color: #718096; font-size: 0.9rem;">Scan for quick access to your
+                            medical records</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights Card -->
+            <div class="dashboard-card">
+                <div class="card-header-custom">
+                    <h2 class="card-title-custom">AI-Powered Insights</h2>
+                    <div class="card-icon">🤖</div>
+                </div>
+
+                <div class="dashboard-card">
+                    <div class="upload-area" onclick="document.getElementById('lab-file').click()">
+                        <div class="upload-icon">📄</div>
+                        <p class="upload-text">Click to upload your lab report</p>
+                        <p style="color: #a0aec0; font-size: 0.9rem; margin-top: 0.5rem;">Supports PDF, JPG, PNG</p>
+                    </div>
+                    <input type="file" id="lab-file" style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
+                    <button class="analyze-btn" onclick="uploadLab()">Analyze Report</button>
+
+                    <div id="lab-result"
+                        style="display:none; margin-top: 2rem; padding: 1.5rem; background: #f7fafc; border-radius: 12px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Medicine Section -->
+            <div id="medicine-section" style="display:none;">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">Medicine Adherence Tracker</h1>
+                    <p class="dashboard-subtitle">Track your medications and never miss a dose</p>
+                </div>
+
+                <button class="analyze-btn" onclick="addMedicineMock()" style="margin-bottom: 2rem;">+ Add
+                    Medicine</button>
+
+                <div id="medicine-list"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                </div>
+            </div>
+    </main>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/patient/login-page';
+
+    function showSection(id) {
+        // Update sidebar active state
+        document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        event.target.closest('.sidebar-nav-link').classList.add('active');
+
+        // Show/hide sections
+        ['dashboard', 'chat', 'lab', 'medicine'].forEach(s => {
+            document.getElementById(s + '-section').style.display = s === id ? 'block' : 'none';
+        });
+
+        if (id === 'dashboard') loadDashboard();
+    }
+
+    async function loadDashboard() {
+        const res = await fetch('/patient/dashboard', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+
+        // Timeline
+        const timelineHtml = data.timeline.map(t => `
+        <div class="timeline-item">
+            <div class="timeline-date">${t.date}</div>
+            <div class="timeline-type">${t.type}</div>
+            <div class="timeline-details">${t.details}</div>
+        </div>
+    `).join('');
+        document.getElementById('timeline-container').innerHTML = timelineHtml || '<p style="color: #a0aec0;">No medical history found.</p>';
+
+        // Insights
+        const insights = data.insights;
+        document.getElementById('insights-container').innerHTML = `
+        <div class="insight-metric">
+            <span class="insight-label">Risk Score</span>
+            <span class="insight-value">${insights.risk_score}/10</span>
+        </div>
+        <div style="padding: 1rem; background: #f7fafc; border-radius: 8px; margin-bottom: 1rem;">
+            <strong style="color: #2d3748;">Survival Insight:</strong>
+            <p style="color: #4a5568; margin-top: 0.5rem;">${insights.survival_insight}</p>
+        </div>
+        <div>
+            <strong style="color: #2d3748; display: block; margin-bottom: 1rem;">Recommended Next Steps:</strong>
+            <ul class="next-steps-list">
+                ${insights.recommended_next_steps.map(s => `<li>${s}</li>`).join('')}
+            </ul>
+        </div>
+    `;
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    const res = await fetch('/patient/upload-report', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
+    });
+    const data = await res.json();
+
+    const resultDiv = document.getElementById('lab-result');
+    resultDiv.style.display = 'block';
+    resultDiv.innerHTML = `
+        <h3 style="color: #2d3748; margin-bottom: 1rem;">Analysis Summary</h3>
+        <p style="color: #4a5568; margin-bottom: 1.5rem;">${data.summary}</p>
+        <h4 style="color: #2d3748; margin-bottom: 0.75rem;">Detailed Values</h4>
+        <pre style="background: white; padding: 1rem; border-radius: 8px; overflow-x: auto;">${JSON.stringify(data.analysis, null, 2)}</pre>
+    `;
+    }
+
+    async function addMedicineMock() {
+        const res = await fetch('/patient/medicine/add?drug_name=Tamoxifen&dosage=20mg&frequency=1&count=20', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        alert('Medicine added successfully!');
+        loadMedicine();
+    }
+
+    async function loadMedicine() {
+        const container = document.getElementById('medicine-list');
+        container.innerHTML = `
+        <div class="medicine-card">
+            <div class="medicine-name">Tamoxifen</div>
+            <div class="medicine-dosage">20mg - Once daily</div>
+            <button class="medicine-btn" onclick="takeMedicine('med_1')">Mark as Taken</button>
+        </div>
+    `;
+    }
+
+    async function takeMedicine(id) {
+        const res = await fetch('/patient/medicine/take/' + id, {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        alert(data.message);
+    }
+
+    // Initial load
+    loadDashboard();
+</script>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Patient App - Onco-Navigator AI{% endblock %}
+
+<script>
+// Add loading animation to the symptom check-in form
+document.querySelector('form[action="/patient/symptoms"]').addEventListener('submit', function() {
+  const btn = document.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.classList.add('loading');
+  }
+});
+</script>
+{% block content %}
+<div class="page-grid">
+  <section class="surface-panel fade-in-up">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h1 class="surface-title" style="margin: 0;">Patient Symptom Check-In</h1>
+      <a href="/patient/login-page" class="btn" style="white-space: nowrap;">🔐 Login to Full Dashboard</a>
+    </div>
+    <p class="surface-body">
+      Please report how you feel today on a scale from 0 (none) to 5 (very severe).
+      High scores will flag your care team for follow-up.
+    </p>
+
+    <div class="alert-banner"
+      style="margin-top: 1.75rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 1.5rem; border-radius: 12px;">
+      <h3 style="margin: 0 0 0.5rem 0; font-size: 1.2rem;">🎯 Want More Features?</h3>
+      <p style="margin: 0 0 1rem 0;">Login to access your full Patient Dashboard with:</p>
+      <ul style="margin: 0; padding-left: 1.5rem;">
+        <li><strong>Smart EHR Timeline</strong> - View your complete medical history</li>
+        <li><strong>AI Chatbot</strong> - Book appointments and get instant answers</li>
+        <li><strong>Lab Report Analysis</strong> - Upload reports for AI-powered insights</li>
+        <li><strong>Medicine Tracker</strong> - Monitor adherence and get refill alerts</li>
+      </ul>
+      <a href="/patient/login-page" class="btn"
+        style="margin-top: 1rem; background: white; color: #667eea; display: inline-block;">Access Full Dashboard →</a>
+    </div>
+
+    <div class="pillar-card" style="margin-top: 1.75rem;">
+      <div class="pillar-label">How It Works</div>
+      <h3 class="pillar-title">Daily Symptom Tracking</h3>
+      <p class="pillar-body">
+        1. Enter your name<br>
+        2. Rate your symptoms today<br>
+        3. Submit your daily check-in<br>
+        4. Care team receives alerts for high scores
+      </p>
+    </div>
+
+    <form action="/patient/symptoms" method="post" class="surface-panel" style="margin-top: 2rem;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="patient_name">Your Full Name</label>
+          <input type="text" id="patient_name" name="patient_name" placeholder="Enter your full name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="nausea">Nausea (0-5)</label>
+          <input type="range" id="nausea" name="nausea" min="0" max="5" value="0" required
+            oninput="this.nextElementSibling.value = this.value" />
+          <output class="surface-body"
+            style="display: block; text-align: center; font-weight: 600; font-size: 1.1rem; margin-top: 0.5rem;">0</output>
+        </div>
+
+        <div class="form-group">
+          <label for="fatigue">Fatigue (0-5)</label>
+          <input type="range" id="fatigue" name="fatigue" min="0" max="5" value="0" required
+            oninput="this.nextElementSibling.value = this.value" />
+          <output class="surface-body"
+            style="display: block; text-align: center; font-weight: 600; font-size: 1.1rem; margin-top: 0.5rem;">0</output>
+        </div>
+
+        <div class="form-group">
+          <label for="pain">Pain (0-5)</label>
+          <input type="range" id="pain" name="pain" min="0" max="5" value="0" required
+            oninput="this.nextElementSibling.value = this.value" />
+          <output class="surface-body"
+            style="display: block; text-align: center; font-weight: 600; font-size: 1.1rem; margin-top: 0.5rem;">0</output>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button type="submit" class="btn">Submit Daily Check-In</button>
+        <button type="reset" class="btn btn-secondary">Reset Form</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="surface-panel fade-in-up">
+    <h2 class="surface-title">Understanding Your Symptoms</h2>
+    <p class="surface-body">
+      Tracking your symptoms daily helps your care team monitor your treatment progress and intervene when needed.
+    </p>
+
+    <div class="pillar-list">
+      <article class="pillar-card">
+        <div class="pillar-label">Symptom Scale</div>
+        <h3 class="pillar-title">Severity Levels</h3>
+        <p class="pillar-body">
+          <strong>0 - None:</strong> No symptoms<br>
+          <strong>1-2 - Mild:</strong> Noticeable but not bothersome<br>
+          <strong>3-4 - Moderate:</strong> Bothersome, affects daily activities<br>
+          <strong>5 - Severe:</strong> Very bothersome, prevents normal activities
+        </p>
+      </article>
+    </div>
+
+    <div class="alert-banner urgent" style="margin-top: 2rem;">
+      <strong>Emergency Contact:</strong> If you're experiencing severe symptoms that require immediate attention,
+      please contact our 24/7 Oncology Emergency Hotline at <strong>1-800-CANCER</strong> or visit your nearest
+      emergency room.
+      <br><br>
+      <strong>When to Call Immediately:</strong> Severe pain (5), difficulty breathing, chest pain, or any symptom that
+      feels life-threatening.
+    </div>
+  </section>
+</div>
+
+<script>
+// Add loading animation to the symptom check-in form
+document.querySelector('form[action="/patient/symptoms"]').addEventListener('submit', function() {
+  const btn = document.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.classList.add('loading');
+  }
+});
+</script>
+{% endblock %}

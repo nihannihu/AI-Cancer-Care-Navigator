@@ -1,0 +1,488 @@
+{% extends "base.html" %}
+{% block title %}AI Diagnostics - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+  <section class="surface-panel fade-in-up">
+    <h1 class="surface-title">AI Diagnostics Suite</h1>
+    <p class="surface-body">
+      Advanced diagnostic tools powered by multiple AI models for comprehensive cancer care support.
+    </p>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="openTab(event, 'image-analysis')">Image Analysis</button>
+      <button class="tab-btn" onclick="openTab(event, 'report-analysis')">Report NLP</button>
+      <button class="tab-btn" onclick="openTab(event, 'predictive-models')">Predictive Models</button>
+      <button class="tab-btn" onclick="openTab(event, 'voice-symptoms')">Voice Symptoms</button>
+    </div>
+
+    <!-- Image Analysis Tab -->
+    <div id="image-analysis" class="tab-content active">
+      <h2 class="section-title">Medical Image Analysis</h2>
+      <p>Upload X-ray, CT Scan, or MRI for AI-powered abnormality detection.</p>
+      <form id="image-form" class="upload-form">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit" class="btn" id="analyze-image-btn">
+          <span>Analyze Image</span>
+        </button>
+      </form>
+      <div id="image-result" class="result-box hidden"></div>
+    </div>
+
+    <!-- Report Analysis Tab -->
+    <div id="report-analysis" class="tab-content">
+      <h2 class="section-title">Pathology Report Analyzer</h2>
+      <p>Upload PDF pathology reports for key finding extraction.</p>
+      <form id="report-form" class="upload-form">
+        <input type="file" name="file" accept=".pdf" required>
+        <button type="submit" class="btn" id="analyze-report-btn">
+          <span>Analyze Report</span>
+        </button>
+      </form>
+      <div id="report-result" class="result-box hidden"></div>
+    </div>
+
+    <!-- Predictive Models Tab -->
+    <div id="predictive-models" class="tab-content">
+      <h2 class="section-title">Predictive Analytics</h2>
+
+      <div class="sub-section">
+        <h3>Treatment Outcome Predictor</h3>
+        <form id="outcome-form" class="prediction-form">
+          <label>Age: <input type="number" name="age" value="50" required></label>
+          <label>Stage (1-4): <input type="number" name="stage" min="1" max="4" value="1" required></label>
+          <label>Comorbidities (0-5): <input type="number" name="comorbidities" min="0" max="5" value="0"
+              required></label>
+          <button type="submit" class="btn btn-secondary" id="predict-outcome-btn">
+            <span>Predict Survival</span>
+          </button>
+        </form>
+        <div id="outcome-result" class="result-box hidden"></div>
+      </div>
+
+      <div class="sub-section">
+        <h3>Side Effect Predictor</h3>
+        <form id="side-effect-form" class="prediction-form">
+          <label>Age: <input type="number" name="age" value="50" required></label>
+          <label>Chemo Type (0-2): <input type="number" name="chemo_type" min="0" max="2" value="0" required></label>
+          <label>Dosage (0-1): <input type="number" name="dosage" step="0.1" value="0.5" required></label>
+          <button type="submit" class="btn btn-secondary" id="predict-side-effect-btn">
+            <span>Predict Side Effects</span>
+          </button>
+        </form>
+        <div id="side-effect-result" class="result-box hidden"></div>
+      </div>
+    </div>
+
+    <!-- Voice Symptoms Tab -->
+    <div id="voice-symptoms" class="tab-content">
+      <h2 class="section-title">Voice-Based Symptom Checker</h2>
+      <p>Speak your symptoms and get AI-powered analysis.</p>
+
+      <div class="voice-controls">
+        <button id="start-record" class="btn">🎤 Start Recording</button>
+        <button id="stop-record" class="btn btn-secondary" disabled>⏹ Stop</button>
+      </div>
+
+      <div class="transcription-box">
+        <h3>Transcription:</h3>
+        <p id="transcription-text">Waiting for speech...</p>
+      </div>
+
+      <button id="analyze-voice-btn" class="btn" disabled>
+        <span>Analyze Symptoms</span>
+      </button>
+      <div id="voice-result" class="result-box hidden"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Add loading animations to all buttons
+  document.getElementById('image-form').addEventListener('submit', function (e) {
+    const btn = document.getElementById('analyze-image-btn');
+    btn.classList.add('loading');
+  });
+
+  document.getElementById('report-form').addEventListener('submit', function (e) {
+    const btn = document.getElementById('analyze-report-btn');
+    btn.classList.add('loading');
+  });
+
+  document.getElementById('outcome-form').addEventListener('submit', function (e) {
+    const btn = document.getElementById('predict-outcome-btn');
+    btn.classList.add('loading');
+  });
+
+  document.getElementById('side-effect-form').addEventListener('submit', function (e) {
+    const btn = document.getElementById('predict-side-effect-btn');
+    btn.classList.add('loading');
+  });
+
+  document.getElementById('analyze-voice-btn').addEventListener('click', function (e) {
+    const btn = document.getElementById('analyze-voice-btn');
+    btn.classList.add('loading');
+  });
+
+  function formatResult(data, type) {
+    var html = '';
+
+    if (type === 'image') {
+      html += '<h3>Analysis Results</h3>';
+      if (data.is_medical_image) {
+        var med = data.medical_analysis;
+        html += '<div class="metric-card"><div class="metric-value">' + (med.confidence_score ? (med.confidence_score * 100).toFixed(1) + '%' : 'N/A') + '</div><div class="metric-label">Confidence</div></div>';
+        html += '<div class="metric-card"><div class="metric-value" style="font-size: 1.2rem;">' + (med.severity || 'Unknown') + '</div><div class="metric-label">Severity</div></div>';
+        html += '<table class="result-table"><tr><th>Detected Condition</th><td>' + (med.detected_condition || 'N/A') + '</td></tr><tr><th>Type</th><td>' + (med.condition_type || 'N/A') + '</td></tr><tr><th>Recommendation</th><td>' + (med.recommendation || 'N/A') + '</td></tr></table>';
+      } else {
+        html += '<p class="badge badge-medium">Non-Medical Image Detected</p><p>' + data.medical_analysis.note + '</p>';
+      }
+
+      // Add image preview if available
+      if (data.image_preview) {
+        html += '<div class="case-image-container">';
+        html += '<img src="' + data.image_preview + '" alt="Analyzed image" class="case-image-preview" onerror="this.src=\'/static/placeholder-image.png\'; this.alt=\'Image not available\';" />';
+        html += '</div>';
+      }
+
+      html += '<h4>Classification (MobileNetV2)</h4><table class="result-table"><thead><tr><th>Label</th><th>Confidence</th></tr></thead><tbody>';
+      if (data.classification) {
+        data.classification.forEach(function (item) {
+          html += '<tr><td>' + item.label + '</td><td>' + (item.confidence * 100).toFixed(2) + '%</td></tr>';
+        });
+      }
+      html += '</tbody></table>';
+
+    } else if (type === 'report') {
+      html += '<h3>Report Analysis</h3>';
+      html += '<div class="metric-card"><div class="metric-value">' + (data.sentiment.compound * 100).toFixed(1) + '</div><div class="metric-label">Sentiment Score</div></div>';
+
+      html += '<h4>Extracted Entities</h4>';
+
+      // 1. Display Alerts
+      if (data.extracted_entities.alerts && data.extracted_entities.alerts.length > 0) {
+        html += '<div class="alerts-section" style="margin-bottom: 1rem;">';
+        data.extracted_entities.alerts.forEach(function (alert) {
+          html += '<div style="background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin-bottom: 8px; border: 1px solid #ffeeba;">';
+          html += '<strong>⚠️ Alert: ' + alert.alert + '</strong><br>';
+          html += 'Why: ' + alert.why + '<br>';
+          html += 'Action: ' + alert.action;
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      // 2. Display Biomarkers Table
+      if (data.extracted_entities.biomarkers && data.extracted_entities.biomarkers.length > 0) {
+        html += '<h5>Biomarker Grid</h5>';
+        html += '<table class="result-table" style="width: 100%; margin-bottom: 1rem;">';
+        html += '<thead><tr><th>Marker</th><th>Status</th><th>Value</th></tr></thead><tbody>';
+        data.extracted_entities.biomarkers.forEach(function (m) {
+          var color = m.status.toLowerCase() === 'positive' || m.status.toLowerCase() === 'high' ? 'red' : 'green';
+          html += '<tr>';
+          html += '<td>' + m.name + '</td>';
+          html += '<td><span style="color:' + color + '; font-weight:bold;">' + m.status + '</span></td>';
+          html += '<td>' + m.value + '</td>';
+          html += '</tr>';
+        });
+        html += '</tbody></table>';
+      }
+
+      // 3. Display other entities
+      for (var key in data.extracted_entities) {
+        if (key === 'biomarkers' || key === 'alerts') continue;
+
+        var values = data.extracted_entities[key];
+        if (values && values.length > 0) {
+          html += '<strong>' + key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ') + ':</strong><div style="margin-bottom: 0.5rem;">';
+          values.forEach(function (v) {
+            html += '<span class="badge badge-low" style="margin-right:4px;">' + v + '</span>';
+          });
+          html += '</div>';
+        }
+      }
+
+    } else if (type === 'outcome') {
+      html += '<h3>Survival Prediction</h3>';
+      html += '<div class="metric-card"><div class="metric-value">' + data.risk_score + '%</div><div class="metric-label">Risk Score</div></div>';
+      html += '<div class="metric-card"><div class="metric-value" style="font-size: 1.2rem;">' + data.predicted_diagnosis + '</div><div class="metric-label">Prediction</div></div>';
+      html += '<p><strong>Probability Breakdown:</strong></p><ul><li>No Disease: ' + data.probabilities.no_disease + '</li><li>Disease Present: ' + data.probabilities.disease_present + '</li></ul>';
+
+    } else if (type === 'side-effect') {
+      html += '<h3>Side Effect Prediction</h3>';
+      html += '<table class="result-table"><tr><th>Nausea Probability</th><td>' + data.nausea_probability + '%</td></tr><tr><th>Hair Loss Severity</th><td>' + data.hair_loss_severity + '</td></tr></table>';
+      if (data.preventive_measures && data.preventive_measures.length > 0) {
+        html += '<h4>Preventive Measures</h4><ul>';
+        data.preventive_measures.forEach(function (m) {
+          html += '<li>' + m + '</li>';
+        });
+        html += '</ul>';
+      }
+
+    } else if (type === 'voice') {
+      html += '<h3>Symptom Analysis</h3>';
+      html += '<div style="white-space: pre-wrap; line-height: 1.6;">' + (data.analysis || JSON.stringify(data)) + '</div>';
+    }
+
+    return html;
+  }
+
+  function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab-btn");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).style.display = "block";
+    evt.currentTarget.className += " active";
+  }
+
+  // Helper function for fetch with timeout
+  async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 30000 } = options;
+
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  }
+
+  document.getElementById('image-form').onsubmit = async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('analyze-image-btn');
+    btn.classList.add('loading');
+    var formData = new FormData(e.target);
+    var resultBox = document.getElementById('image-result');
+    resultBox.innerHTML = '<p>Analyzing...</p>';
+    resultBox.classList.remove('hidden');
+
+    try {
+      var res = await fetchWithTimeout('/api/analyze-image', {
+        method: 'POST',
+        body: formData
+      });
+
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+
+      var data = await res.json();
+      resultBox.innerHTML = formatResult(data, 'image');
+    } catch (err) {
+      resultBox.innerHTML = '<div style="color: #721c24; background-color: #f8d7da; padding: 1rem;">Error: ' + err.message + '</div>';
+    } finally {
+      btn.classList.remove('loading');
+    }
+  };
+
+  document.getElementById('report-form').onsubmit = async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('analyze-report-btn');
+    btn.classList.add('loading');
+    var formData = new FormData(e.target);
+    var resultBox = document.getElementById('report-result');
+    resultBox.innerHTML = '<p>Analyzing...</p>';
+    resultBox.classList.remove('hidden');
+
+    try {
+      var res = await fetchWithTimeout('/api/analyze-report', {
+        method: 'POST',
+        body: formData
+      });
+
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+
+      var data = await res.json();
+      resultBox.innerHTML = formatResult(data, 'report');
+    } catch (err) {
+      resultBox.innerHTML = '<div style="color: #721c24; background-color: #f8d7da; padding: 1rem;">Error: ' + err.message + '</div>';
+    } finally {
+      btn.classList.remove('loading');
+    }
+  };
+
+  document.getElementById('outcome-form').onsubmit = async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('predict-outcome-btn');
+    btn.classList.add('loading');
+    var formData = new FormData(e.target);
+    var resultBox = document.getElementById('outcome-result');
+    resultBox.innerHTML = '<p>Predicting...</p>';
+    resultBox.classList.remove('hidden');
+
+    var payload = {
+      age: parseInt(formData.get('age')),
+      stage: parseInt(formData.get('stage')),
+      comorbidities: parseInt(formData.get('comorbidities'))
+    };
+
+    try {
+      var res = await fetchWithTimeout('/api/predict-outcome', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+
+      var data = await res.json();
+      resultBox.innerHTML = formatResult(data, 'outcome');
+    } catch (err) {
+      resultBox.innerHTML = '<div style="color: #721c24; background-color: #f8d7da; padding: 1rem;">Error: ' + err.message + '</div>';
+    } finally {
+      btn.classList.remove('loading');
+    }
+  };
+
+  document.getElementById('side-effect-form').onsubmit = async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('predict-side-effect-btn');
+    btn.classList.add('loading');
+    var formData = new FormData(e.target);
+    var resultBox = document.getElementById('side-effect-result');
+    resultBox.innerHTML = '<p>Predicting...</p>';
+    resultBox.classList.remove('hidden');
+
+    var payload = {
+      age: parseInt(formData.get('age')),
+      chemo_type: parseInt(formData.get('chemo_type')),
+      dosage: parseFloat(formData.get('dosage'))
+    };
+
+    try {
+      var res = await fetchWithTimeout('/api/predict-side-effects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+      }
+
+      var data = await res.json();
+      resultBox.innerHTML = formatResult(data, 'side-effect');
+    } catch (err) {
+      resultBox.innerHTML = '<div style="color: #721c24; background-color: #f8d7da; padding: 1rem;">Error: ' + err.message + '</div>';
+    } finally {
+      btn.classList.remove('loading');
+    }
+  };
+
+  // Voice recognition functionality
+  var recognition;
+  var isRecording = false;
+
+  document.getElementById('start-record').onclick = function () {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Speech recognition not supported in this browser.');
+      return;
+    }
+
+    recognition = new webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = function () {
+      isRecording = true;
+      document.getElementById('start-record').disabled = true;
+      document.getElementById('stop-record').disabled = false;
+      document.getElementById('transcription-text').textContent = 'Listening...';
+    };
+
+    recognition.onresult = function (event) {
+      var transcript = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript;
+        }
+      }
+      if (transcript) {
+        document.getElementById('transcription-text').textContent = transcript;
+        document.getElementById('analyze-voice-btn').disabled = false;
+      }
+    };
+
+    recognition.onerror = function (event) {
+      document.getElementById('transcription-text').textContent = 'Error: ' + event.error;
+    };
+
+    recognition.onend = function () {
+      isRecording = false;
+      document.getElementById('start-record').disabled = false;
+      document.getElementById('stop-record').disabled = true;
+    };
+
+    recognition.start();
+  };
+
+  document.getElementById('stop-record').onclick = function () {
+    if (recognition && isRecording) {
+      recognition.stop();
+    }
+  };
+
+  document.getElementById('analyze-voice-btn').onclick = async function () {
+    const btn = document.getElementById('analyze-voice-btn');
+    btn.classList.add('loading');
+    var text = document.getElementById('transcription-text').textContent;
+    var resultBox = document.getElementById('voice-result');
+
+    if (!text || text === 'Waiting for speech...') {
+      alert('Please record some speech first.');
+      btn.classList.remove('loading');
+      return;
+    }
+
+    resultBox.innerHTML = '<p>Analyzing symptoms...</p>';
+    resultBox.classList.remove('hidden');
+
+    try {
+      var res = await fetchWithTimeout('/api/analyze-symptoms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: text })
+      });
+
+      if (!res.ok) {
+        throw new Error('API request failed with status ' + res.status + ': ' + await res.text());
+      }
+
+      var contentType = res.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Expected JSON response but got ' + contentType);
+      }
+
+      var data = await res.json();
+      resultBox.innerHTML = formatResult(data, 'voice');
+    } catch (err) {
+      resultBox.innerHTML = '<div style="color: #721c24; background-color: #f8d7da; padding: 1rem;">Error: ' + err.message + '</div>';
+    } finally {
+      btn.classList.remove('loading');
+    }
+  };
+</script>
+{% endblock %}

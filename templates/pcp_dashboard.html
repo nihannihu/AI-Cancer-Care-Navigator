@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}PCP Triage - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+  <section class="surface-panel fade-in-up">
+    <h1 class="surface-title">PCP Triage Portal</h1>
+    <p class="surface-body">
+      Upload a mammography image to get an AI-based malignancy risk score and forward
+      flagged cases to the NCG oncologist worklist for immediate review and navigation.
+    </p>
+
+    <div class="pillar-card" style="margin-top: 1.75rem;">
+      <div class="pillar-label">How It Works</div>
+      <h3 class="pillar-title">AI-Assisted Diagnosis</h3>
+      <p class="pillar-body">
+        1. Enter patient details (name, email, phone)<br>
+        2. Upload mammography scan (JPEG/PNG format)<br>
+        3. Receive AI risk assessment in seconds<br>
+        4. High-risk cases automatically forwarded to oncologist worklist<br>
+        5. Patient can register with same email to view their results
+      </p>
+    </div>
+
+    <form action="/pcp/upload" method="post" enctype="multipart/form-data" class="surface-panel"
+      style="margin-top: 2rem;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="patient_name">Patient Full Name</label>
+          <input type="text" id="patient_name" name="patient_name" placeholder="Enter patient's full name" required />
+        </div>
+
+        <div class="form-group">
+          <label for="patient_email">Patient Email</label>
+          <input type="email" id="patient_email" name="patient_email" placeholder="patient@example.com" required 
+                 style="padding: 1rem; font-size: 1.1rem; border-radius: 8px;" />
+          <p class="surface-body" style="margin-top: 0.5rem; font-size: 0.9rem; color: #94a3b8;">
+            Patient will use this email to register and view their results
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="patient_phone">Patient Phone</label>
+          <input type="tel" id="patient_phone" name="patient_phone" placeholder="+91-9876543210" required 
+                 style="padding: 1rem; font-size: 1.1rem; border-radius: 8px;" />
+          <p class="surface-body" style="margin-top: 0.5rem; font-size: 0.9rem; color: #94a3b8;">
+            For appointment notifications
+          </p>
+        </div>
+
+        <div class="form-group">
+          <label for="file">Scan Image (JPEG/PNG)</label>
+          <input type="file" id="file" name="file" accept="image/jpeg,image/png" required />
+          <p class="surface-body" style="margin-top: 0.75rem; font-size: 0.95rem;">
+            Supported formats: JPEG, PNG | Max size: 10MB
+          </p>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button type="submit" class="btn btn-primary" id="upload-btn">
+          <span>Upload & Analyze</span>
+        </button>
+        <button type="reset" class="btn btn-secondary">Reset Form</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="surface-panel fade-in-up">
+    <h2 class="surface-title">About This AI Model</h2>
+    <p class="surface-body">
+      Our CNN model was trained on the CBIS-DDSM dataset with over 2,000 mammography images.
+      It provides malignancy risk scores to assist PCPs in identifying cases requiring specialist referral.
+    </p>
+
+    <div class="pillar-list" style="margin-top: 1.5rem;">
+      <article class="pillar-card">
+        <div class="pillar-label">Model Performance</div>
+        <h3 class="pillar-title">Diagnostic Accuracy</h3>
+        <p class="pillar-body">
+          • Accuracy: ~92% on validation set<br>
+          • Sensitivity: ~89% for malignant cases<br>
+          • Specificity: ~94% for benign cases<br>
+          • Processing time: &lt;2 seconds
+        </p>
+      </article>
+    </div>
+
+    <div class="alert-banner" style="margin-top: 2rem;">
+      <strong>Important:</strong> This AI tool is intended to assist, not replace, clinical judgment.
+      Always consider patient history and clinical findings in your decision-making.
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+<script>
+// Add loading animation to the upload form
+document.querySelector('form[action="/pcp/upload"]').addEventListener('submit', function() {
+  const btn = document.getElementById('upload-btn');
+  btn.classList.add('loading');
+});
+</script>

@@ -1,0 +1,58 @@
+Searching near 12.9716, 77.5946 with radius 50000m
+
+--- Query 1: healthcare.hospital ---
+URL: https://api.geoapify.com/v2/places?categories=healthcare.hospital&filter=circle:77.5946,12.9716,50000&limit=20&apiKey=aacb5a4e767e4e5993d5b2e4202bf541
+Found 20 raw features.
+1. Klinik Guhen - Dental Clinic (10.24 km) - Cats: ['healthcare', 'healthcare.hospital', 'wheelchair', 'wheelchair.yes']
+   [FILTERED OUT] Name contains dental/clinic
+2. Sakra World (10.76 km) - Cats: ['healthcare', 'healthcare.hospital', 'wheelchair', 'wheelchair.yes']
+   [KEPT]
+3. Cloud Nine (10.72 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+4. Lucid Medical Diagnostics (4.84 km) - Cats: ['healthcare', 'healthcare.hospital', 'internet_access']
+   [KEPT]
+5. Nature Cure Hospital (4.41 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+6. Narayana Nethralaya (12.46 km) - Cats: ['healthcare.hospital']
+   [KEPT]
+7. Nethradhama (14.23 km) - Cats: ['healthcare.hospital']
+   [KEPT]
+8. St.John's Medical College Hospital (5.33 km) - Cats: ['building', 'building.healthcare', 'healthcare', 'healthcare.hospital']
+   [KEPT]
+9. National Institute of Mental Health and NeuroSciences (3.79 km) - Cats: ['education', 'education.university', 'healthcare', 'healthcare.hospital']
+   [KEPT]
+10. Aster RV Hospital (6.77 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+11. Chinmaya Mission Hospital (5.63 km) - Cats: ['healthcare', 'healthcare.hospital', 'wheelchair', 'wheelchair.yes']
+   [KEPT]
+12. St Marthas Hospital (0.95 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+13. Vydehi Superspeciality Hospital (0.41 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+14. Fortis Hospitals, Bannerghatta Road (8.56 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+15. Apollo Hospital (8.38 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+16. Bowring and Lady Curzon Hospitals (1.70 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+17. Bangalore Baptist Hospital (7.02 km) - Cats: ['healthcare.hospital', 'wheelchair', 'wheelchair.limited']
+   [KEPT]
+18. Rajshekhar Hospital (6.93 km) - Cats: ['healthcare', 'healthcare.hospital']
+   [KEPT]
+19. Sankara Eye Hospital (12.91 km) - Cats: ['healthcare', 'healthcare.clinic_or_praxis.ophthalmology', 'healthcare.hospital']
+   [KEPT]
+20. Ramaiah Memorial Hospital (6.85 km) - Cats: ['building', 'building.healthcare', 'healthcare', 'healthcare.hospital']
+   [KEPT]
+
+--- Query 2: healthcare (General) ---
+URL: https://api.geoapify.com/v2/places?categories=healthcare&filter=circle:77.5946,12.9716,50000&limit=20&apiKey=aacb5a4e767e4e5993d5b2e4202bf541
+Found 20 raw features.
+   [NEW] Kaya Skin Bar (3.46 km)
+   [NEW] Trust Pharmacy (3.43 km)
+   [NEW] Medall Clumax Diagnostics (4.20 km)
+   [NEW] Arya Vaidya Sala Kottakkal (3.57 km)
+   [NEW] MedPlus (4.43 km)
+   [NEW] Rayara Kirana (3.43 km)
+   [NEW] Oral rehabilitation center (2.87 km)
+   [NEW] Jyothi The Lasik Vision Centre (3.12 km)
+   [NEW] Metphi Clinic (4.73 km)
