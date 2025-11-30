@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Patient Symptoms - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+  <section class="surface-panel fade-in-up">
+    <h1 class="surface-title">Patient Symptom History</h1>
+    <p class="surface-body">
+      Review daily symptom check-ins from patients in your care. Monitor for critical symptoms requiring immediate attention.
+    </p>
+
+    {% if symptoms %}
+    <div class="toolbar">
+      <div class="toolbar-title">{{ symptoms|length }} symptom report(s)</div>
+      <form action="/oncologist/patient-symptoms/clear" method="post" onsubmit="return confirm('Clear all symptom reports? This action cannot be undone.');" style="margin: 0;">
+        <button class="btn btn-danger" type="submit">Clear Reports</button>
+      </form>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Patient Name</th>
+            <th>Nausea</th>
+            <th>Fatigue</th>
+            <th>Pain</th>
+            <th>Overall Score</th>
+            <th>Status</th>
+            <th>Action Required</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for symptom in symptoms|reverse %}
+          <tr>
+            <td>{{ symptom.timestamp }}</td>
+            <td>{{ symptom.patient_name }}</td>
+            <td>
+              <div class="symptom-score">{{ symptom.nausea }}</div>
+              {% if symptom.nausea >= 4 %}
+              <span class="badge badge-high">Severe</span>
+              {% elif symptom.nausea >= 3 %}
+              <span class="badge">Moderate</span>
+              {% else %}
+              <span class="badge badge-low">Mild</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="symptom-score">{{ symptom.fatigue }}</div>
+              {% if symptom.fatigue >= 4 %}
+              <span class="badge badge-high">Severe</span>
+              {% elif symptom.fatigue >= 3 %}
+              <span class="badge">Moderate</span>
+              {% else %}
+              <span class="badge badge-low">Mild</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="symptom-score">{{ symptom.pain }}</div>
+              {% if symptom.pain >= 4 %}
+              <span class="badge badge-high">Severe</span>
+              {% elif symptom.pain >= 3 %}
+              <span class="badge">Moderate</span>
+              {% else %}
+              <span class="badge badge-low">Mild</span>
+              {% endif %}
+            </td>
+            <td>
+              {% set max_score = [symptom.nausea, symptom.fatigue, symptom.pain]|max %}
+              <div class="symptom-score">{{ max_score }}</div>
+              {% if max_score >= 4 %}
+              <span class="badge badge-high">Critical</span>
+              {% elif max_score >= 3 %}
+              <span class="badge">High</span>
+              {% else %}
+              <span class="badge badge-low">Normal</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if max_score >= 4 %}
+              <span class="badge badge-high">Immediate Attention</span>
+              {% elif max_score >= 3 %}
+              <span class="badge">Monitor</span>
+              {% else %}
+              <span class="badge badge-low">Stable</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if max_score >= 4 %}
+              <span class="badge badge-high">CALL PATIENT</span>
+              {% elif max_score >= 3 %}
+              <span class="badge">Follow-up</span>
+              {% else %}
+              <span class="badge badge-low">None</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h3>No patient symptom reports yet</h3>
+      <p>Patients will appear here after submitting their daily check-ins.</p>
+      <div style="margin-top: 1.5rem;">
+        <a href="/patient" class="btn">Go to Patient Portal</a>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="surface-panel fade-in-up">
+    <h2 class="surface-title">Symptom Monitoring Guidance</h2>
+    <p class="surface-body">
+      Use this dashboard to monitor patient-reported symptoms and identify those requiring immediate attention.
+    </p>
+    
+    <div class="pillar-list">
+      <article class="pillar-card">
+        <div class="pillar-label">Severity Levels</div>
+        <h3 class="pillar-title">Symptom Assessment</h3>
+        <p class="pillar-body">
+          <span class="badge badge-high">Critical (4-5)</span> - Immediate intervention required<br>
+          <span class="badge">High (3-3.9)</span> - Monitor closely, consider follow-up<br>
+          <span class="badge badge-low">Normal (0-2.9)</span> - Routine monitoring
+        </p>
+      </article>
+    </div>
+    
+    <div class="alert-banner urgent" style="margin-top: 2rem;">
+      <strong>Emergency Protocol:</strong> For patients reporting critical symptoms (score ≥4), 
+      contact them immediately via phone and arrange for urgent clinical evaluation.
+      <br><br>
+      <strong>Emergency Contact:</strong> 24/7 Oncology Hotline - <strong>1-800-CANCER</strong>
+    </div>
+  </section>
+</div>
+
+<script>
+// Add loading animation to the Clear Reports form
+document.querySelector('form[action="/oncologist/patient-symptoms/clear"]').addEventListener('submit', function() {
+  const btn = document.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.classList.add('loading');
+  }
+});
+</script>
+{% endblock %}

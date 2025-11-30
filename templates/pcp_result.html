@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Result{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="result-card">
+        <h2>AI Breast Cancer Analysis Result</h2>
+        
+        {% if error %}
+        <div class="error-message">
+            <h3>⚠️ Model Unavailable</h3>
+            <p>{{ error }}</p>
+            <p>The image analysis feature is currently disabled due to missing model files.</p>
+        </div>
+        {% else %}
+        <div class="patient-info">
+            <p><strong>Patient:</strong> {{ patient_name }}</p>
+            <p><strong>Case ID:</strong> {{ case_id }}</p>
+            <p><strong>Analysis Timestamp:</strong> {{ timestamp }}</p>
+            {% if cancer_stage %}
+            <p><strong>Cancer Stage:</strong> <span class="stage-badge {{ cancer_stage.split(' ')[1] if cancer_stage.split(' ')|length > 1 else 'unknown' }}">{{ cancer_stage }}</span></p>
+            {% endif %}
+        </div>
+
+        <div class="risk-assessment">
+            <h3>Risk Assessment</h3>
+            <div class="risk-score">
+                <span class="score-value">{{ "%.2f"|format(risk_score * 100) }}%</span>
+                <span class="risk-label {{ risk_label }}">{{ risk_label.replace('_', ' ').title() }}</span>
+            </div>
+        </div>
+
+        {% if image_url %}
+        <div class="image-preview">
+            <h3>Uploaded Image</h3>
+            <div class="case-image-container">
+                <img src="{{ image_url }}" alt="Uploaded mammogram" class="case-image-preview">
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="recommendations">
+            <h3>Next Steps</h3>
+            {% if risk_label == "BENIGN" %}
+            <div class="benign-result">
+                <h4 style="color: #10b981; margin-top: 0;">✅ Low Risk Detected</h4>
+                <p>Continue with regular screening as recommended by your healthcare provider.</p>
+            </div>
+            {% elif risk_label == "MALIGNANT" %}
+            <div class="malignant-result">
+                <h4 style="color: #ef4444; margin-top: 0;">⚠️ High Risk Detected</h4>
+                <p>Please schedule an appointment with an oncologist immediately for further evaluation.</p>
+            </div>
+            {% else %}
+            <div class="uncertain-result">
+                <h4 style="color: #f59e0b; margin-top: 0;">❓ Uncertain Result</h4>
+                <p>Consult with your healthcare provider for further evaluation.</p>
+            </div>
+            {% endif %}
+            
+            {% if cancer_stage %}
+            <div class="stage-info">
+                <h4>Cancer Stage Information</h4>
+                {% if cancer_stage == "Stage 0 (DCIS)" %}
+                <p>Stage 0 (DCIS) - Ductal Carcinoma In Situ: Non-invasive cancer where abnormal cells are contained within the milk ducts.</p>
+                {% elif cancer_stage == "Stage I" %}
+                <p>Stage I: Early-stage invasive cancer with a tumor size of 2 cm or less, and no lymph node involvement.</p>
+                {% elif cancer_stage == "Stage II" %}
+                <p>Stage II: Tumors are larger (2-5 cm) or have spread to a few nearby lymph nodes.</p>
+                {% elif cancer_stage == "Stage III" %}
+                <p>Stage III: Locally advanced cancer with larger tumors and more extensive lymph node involvement.</p>
+                {% elif cancer_stage == "Stage IV" %}
+                <p>Stage IV: Metastatic cancer that has spread to other parts of the body.</p>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="actions">
+            <a href="/pcp" class="btn btn-secondary">New Scan</a>
+            <a href="/oncologist" class="btn btn-primary">Oncologist Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enhanced styling for better highlighting */
+.risk-assessment {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: var(--medical-radius-md);
+    padding: 2rem;
+    border: 1px solid var(--medical-border);
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.risk-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.score-value {
+    font-size: 3rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.02em;
+}
+
+.risk-label {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--medical-radius-lg);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.risk-label.BENIGN {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.risk-label.MALIGNANT {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.1));
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.risk-label.UNKNOWN {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.patient-info {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: var(--medical-radius-md);
+    padding: 1.5rem;
+    border: 1px solid var(--medical-border);
+    margin-bottom: 1.5rem;
+}
+
+.patient-info p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.stage-badge {
+    font-size: 1.2rem;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--medical-radius-md);
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+.benign-result, .malignant-result, .uncertain-result {
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: var(--medical-radius-md);
+    padding: 1.5rem;
+    border: 1px solid var(--medical-border);
+    margin: 1.5rem 0;
+}
+
+.result-card {
+    max-width: 800px;
+    margin: 2rem auto;
+    background: rgba(30, 41, 59, 0.9);
+    border-radius: var(--medical-radius-lg);
+    padding: 2rem;
+    border: 1px solid var(--medical-border);
+    box-shadow: var(--medical-shadow-lg);
+}
+
+.result-card h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    color: var(--medical-text-primary);
+    background: linear-gradient(135deg, var(--medical-primary), var(--medical-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+</style>
+{% endblock %}

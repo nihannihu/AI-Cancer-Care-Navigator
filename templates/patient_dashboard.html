@@ -1,0 +1,1045 @@
+{% extends "base.html" %}
+{% block title %}Patient Dashboard - Onco-Navigator AI{% endblock %}
+{% block content %}
+
+<style>
+    /* Dashboard Container */
+    .dashboard-container {
+        display: flex;
+        min-height: calc(100vh - 80px);
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        padding: 0;
+    }
+
+    /* Sidebar */
+    .dashboard-sidebar {
+        width: 280px;
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(10px);
+        padding: 2rem 0;
+        box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
+        border-right: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .sidebar-nav {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .sidebar-nav-item {
+        margin: 0.5rem 1rem;
+    }
+
+    .sidebar-nav-link {
+        display: flex;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        color: #94a3b8;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .sidebar-nav-link:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        color: white;
+        transform: translateX(5px);
+    }
+
+    .sidebar-nav-link.active {
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    }
+
+    .sidebar-nav-icon {
+        margin-right: 0.75rem;
+        font-size: 1.2rem;
+    }
+
+    /* Main Content */
+    .dashboard-main {
+        flex: 1;
+        padding: 2rem;
+        overflow-y: auto;
+    }
+
+    .dashboard-header {
+        background: rgba(30, 41, 59, 0.8);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .dashboard-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0;
+    }
+
+    .dashboard-subtitle {
+        color: #cbd5e1;
+        margin-top: 0.5rem;
+    }
+
+    /* Cards */
+    .dashboard-card {
+        background: rgba(30, 41, 59, 0.8);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        height: 100%;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header-custom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .card-title-custom {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #f1f5f9;
+        margin: 0;
+    }
+
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        color: white;
+    }
+
+    /* Timeline */
+    .timeline-item {
+        padding: 1rem;
+        border-left: 3px solid #2563eb;
+        margin-bottom: 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 0 8px 8px 0;
+        transition: all 0.3s ease;
+    }
+
+    .timeline-item:hover {
+        background: rgba(15, 23, 42, 0.7);
+        border-left-color: #0ea5e9;
+    }
+
+    .timeline-date {
+        font-weight: 600;
+        color: #2563eb;
+        font-size: 0.9rem;
+    }
+
+    .timeline-type {
+        font-weight: 500;
+        color: #f1f5f9;
+        margin-top: 0.25rem;
+    }
+
+    .timeline-details {
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Insights */
+    .insight-metric {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+
+    .insight-label {
+        font-weight: 500;
+        color: #cbd5e1;
+    }
+
+    .insight-value {
+        font-weight: 700;
+        font-size: 1.5rem;
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .next-steps-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .next-steps-list li {
+        padding: 0.5rem 0;
+        color: #cbd5e1;
+        border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .next-steps-list li:last-child {
+        border-bottom: none;
+    }
+
+    /* Chat */
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 500px;
+        background: rgba(15, 23, 42, 0.7);
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .chat-message {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-message.user {
+        align-items: flex-end;
+    }
+
+    .chat-bubble {
+        max-width: 80%;
+        padding: 1rem;
+        border-radius: 18px;
+        color: #f1f5f9;
+        line-height: 1.5;
+    }
+
+    .chat-bubble.user {
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        border-bottom-right-radius: 4px;
+    }
+
+    .chat-bubble.bot {
+        background: rgba(30, 41, 59, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-bottom-left-radius: 4px;
+    }
+
+    .chat-input-container {
+        display: flex;
+        padding: 1rem;
+        background: rgba(30, 41, 59, 0.9);
+        border-top: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .chat-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border-radius: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        background: rgba(15, 23, 42, 0.8);
+        color: #f1f5f9;
+        font-size: 1rem;
+    }
+
+    .chat-input:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+    }
+
+    .chat-send-btn {
+        margin-left: 0.75rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 24px;
+        border: none;
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .chat-send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Usage Example Buttons - Enhanced */
+    .usage-example-btn {
+        margin-top: 0.75rem;
+        padding: 0.5rem 1rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: #f1f5f9;
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        text-align: left;
+    }
+
+    .usage-example-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(2px);
+    }
+
+    /* Lab Reports */
+    .upload-area {
+        border: 2px dashed rgba(148, 163, 184, 0.3);
+        border-radius: 12px;
+        padding: 3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(15, 23, 42, 0.4);
+    }
+
+    .upload-area:hover {
+        border-color: #2563eb;
+        background: rgba(37, 99, 235, 0.1);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        color: #94a3b8;
+    }
+
+    .upload-text {
+        font-size: 1.1rem;
+        color: #cbd5e1;
+        font-weight: 500;
+    }
+
+    .analyze-btn {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        margin-top: 1.5rem;
+        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .analyze-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+    }
+
+    .analyze-btn.loading {
+        opacity: 0.7;
+        cursor: wait;
+    }
+
+    /* Medicine */
+    .medicine-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .medicine-card {
+        background: rgba(15, 23, 42, 0.7);
+        border-radius: 12px;
+        padding: 1.5rem;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .medicine-name {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #f1f5f9;
+        margin-bottom: 0.5rem;
+    }
+
+    .medicine-dosage {
+        color: #94a3b8;
+        margin-bottom: 1rem;
+    }
+
+    .medicine-btn {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 8px;
+        border: none;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .medicine-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    /* QR Code */
+    .qr-container {
+        text-align: center;
+        padding: 1.5rem;
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 12px;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .qr-code-img {
+        max-width: 200px;
+        height: auto;
+        margin: 0 auto 1rem;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 8px;
+    }
+
+    /* Responsive fixes for dashboard */
+    @media (max-width: 992px) {
+        .dashboard-container {
+            flex-direction: column;
+        }
+
+        .dashboard-sidebar {
+            width: 100%;
+            padding: 1rem 0;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .sidebar-nav-item {
+            margin: 0.25rem;
+        }
+
+        .sidebar-nav-link {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .dashboard-main {
+            padding: 1rem;
+        }
+
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.75rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            min-height: auto;
+        }
+
+        .dashboard-main {
+            padding: 1rem 0.5rem;
+        }
+
+        .dashboard-header {
+            padding: 1.25rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+        }
+
+        .dashboard-card {
+            padding: 1.25rem;
+        }
+
+        .card-header-custom {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .chat-container {
+            height: 400px;
+        }
+
+        .chat-bubble {
+            max-width: 90%;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .medicine-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-header {
+            padding: 1rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.3rem;
+        }
+
+        .dashboard-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .dashboard-card {
+            padding: 1rem;
+        }
+
+        .card-title-custom {
+            font-size: 1.1rem;
+        }
+
+        .chat-container {
+            height: 350px;
+        }
+
+        .chat-input-container {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .chat-input {
+            margin-bottom: 0.5rem;
+        }
+
+        .chat-send-btn {
+            margin-left: 0;
+            padding: 0.75rem;
+        }
+
+        .lab-upload-container,
+        .lab-result-container {
+            padding: 1rem;
+        }
+
+        .medicine-card {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="dashboard-sidebar">
+        <ul class="sidebar-nav">
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link active" onclick="showSection('dashboard', this); return false;">
+                    <span class="sidebar-nav-icon">📊</span>
+                    Dashboard
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="showSection('chat', this); return false;">
+                    <span class="sidebar-nav-icon">💬</span>
+                    Chatbot & Booking
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="showSection('lab', this); return false;">
+                    <span class="sidebar-nav-icon">🔬</span>
+                    Lab Reports
+                </a>
+            </li>
+            <li class="sidebar-nav-item">
+                <a href="#" class="sidebar-nav-link" onclick="showSection('medicine', this); return false;">
+                    <span class="sidebar-nav-icon">💊</span>
+                    Medicine Tracker
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+        <!-- Dashboard Section -->
+        <div id="dashboard-section">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Smart EHR Dashboard</h1>
+                <p class="dashboard-subtitle">Your personalized health insights and medical timeline</p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                <!-- Timeline Card -->
+                <div class="dashboard-card">
+                    <div class="card-header-custom">
+                        <h2 class="card-title-custom">Medical Timeline</h2>
+                        <div class="card-icon">📅</div>
+                    </div>
+                    <div id="timeline-container">Loading...</div>
+                </div>
+
+                <!-- QR Code Card -->
+                <div class="dashboard-card">
+                    <div class="card-header-custom">
+                        <h2 class="card-title-custom">My QR Code</h2>
+                        <div class="card-icon">📱</div>
+                    </div>
+                    <div class="qr-container">
+                        <img id="qr-code-img" class="qr-code-img" alt="Patient QR Code">
+                        <p style="margin-top: 1rem; color: #cbd5e1; font-size: 0.9rem;">Scan for quick access to your
+                            medical records</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Insights Card -->
+            <div class="dashboard-card">
+                <div class="card-header-custom">
+                    <h2 class="card-title-custom">AI-Powered Insights</h2>
+                    <div class="card-icon">🤖</div>
+                </div>
+                <div id="insights-container">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chat-section" style="display:none;">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">AI Chatbot & Appointment Booking</h1>
+                <p class="dashboard-subtitle">Get instant answers and schedule appointments</p>
+            </div>
+
+            <!-- Usage Guide Panel -->
+            <div class="dashboard-card" style="margin-bottom: 2rem;">
+                <div class="card-header-custom">
+                    <h2 class="card-title-custom">💡 How to Use This Chatbot</h2>
+                </div>
+
+                <p style="color: #cbd5e1; margin-bottom: 1.5rem;">I can help you with appointments, medicine tracking,
+                    lab results, and emotional support. Here's what you can ask:</p>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                    <!-- Appointment Booking -->
+                    <div
+                        style="background: rgba(124, 58, 237, 0.1); padding: 1.25rem; border-radius: 12px; border-left: 4px solid #7c3aed;">
+                        <h4 style="color: #7c3aed; margin: 0 0 0.75rem 0; font-size: 1rem;">📅 Appointment Booking</h4>
+                        <div style="font-size: 0.9rem; color: #cbd5e1;">
+                            <p style="margin: 0.5rem 0;"><strong>Try:</strong></p>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li>"Book a consultation with Dr. Sharma for next Monday at 2 PM"</li>
+                                <li>"I need to see an oncologist this week"</li>
+                            </ul>
+                            <button
+                                onclick="useExample('I need to book a consultation with Dr. Sharma for next Monday at 2 PM')"
+                                class="usage-example-btn">
+                                Try This Example
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Medicine Reminders -->
+                    <div
+                        style="background: rgba(14, 165, 233, 0.1); padding: 1.25rem; border-radius: 12px; border-left: 4px solid #0ea5e9;">
+                        <h4 style="color: #0ea5e9; margin: 0 0 0.75rem 0; font-size: 1rem;">💊 Medicine Tracking</h4>
+                        <div style="font-size: 0.9rem; color: #cbd5e1;">
+                            <p style="margin: 0.5rem 0;"><strong>Try:</strong></p>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li>"I just took my Cisplatin"</li>
+                                <li>"Do I need to buy more meds?"</li>
+                            </ul>
+                            <button onclick="useExample('I just took my Cisplatin')" class="usage-example-btn">
+                                Try This Example
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lab Results -->
+                    <div
+                        style="background: rgba(236, 72, 153, 0.1); padding: 1.25rem; border-radius: 12px; border-left: 4px solid #ec4899;">
+                        <h4 style="color: #ec4899; margin: 0 0 0.75rem 0; font-size: 1rem;">🔬 Lab Analysis</h4>
+                        <div style="font-size: 0.9rem; color: #cbd5e1;">
+                            <p style="margin: 0.5rem 0;"><strong>Try:</strong></p>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li>"My WBC count is 3.2, is that okay?"</li>
+                                <li>"Explain my hemoglobin results"</li>
+                            </ul>
+                            <button onclick="useExample('My WBC count is 3.2, is that okay?')"
+                                class="usage-example-btn">
+                                Try This Example
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Emotional Support -->
+                    <div
+                        style="background: rgba(245, 158, 11, 0.1); padding: 1.25rem; border-radius: 12px; border-left: 4px solid #f59e0b;">
+                        <h4 style="color: #f59e0b; margin: 0 0 0.75rem 0; font-size: 1rem;">💙 Support & Guidance</h4>
+                        <div style="font-size: 0.9rem; color: #cbd5e1;">
+                            <p style="margin: 0.5rem 0;"><strong>Try:</strong></p>
+                            <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                                <li>"I feel nauseous after chemo"</li>
+                                <li>"I'm scared about my surgery"</li>
+                            </ul>
+                            <button
+                                onclick="useExample('I feel very nauseous after my chemo yesterday. Is this normal?')"
+                                class="usage-example-btn">
+                                Try This Example
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="margin-top: 1.5rem; padding: 1rem; background: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; border-radius: 8px;">
+                    <p style="margin: 0; color: #fbbf24; font-size: 0.9rem;">
+                        <strong>💡 Pro Tip:</strong> Be specific! Instead of "Help me", try "I need to book Dr. Sharma
+                        for next Monday at 2 PM" for faster, more accurate responses.
+                    </p>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-history">
+                    <div class="chat-message">
+                        <div class="chat-bubble bot">
+                            👋 Hello! I'm your AI health assistant. How can I help you today?
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Type your message..."
+                        onkeypress="if(event.key==='Enter') sendMessage()">
+                    <button class="chat-send-btn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lab Section -->
+        <div id="lab-section" style="display:none;">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Lab Report Analysis</h1>
+                <p class="dashboard-subtitle">Upload and analyze your medical reports with AI</p>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="upload-area" onclick="document.getElementById('lab-file').click()">
+                    <div class="upload-icon">📄</div>
+                    <p class="upload-text">Click to upload your lab report</p>
+                    <p style="color: #94a3b8; font-size: 0.9rem; margin-top: 0.5rem;">Supports PDF, JPG, PNG</p>
+                </div>
+                <input type="file" id="lab-file" style="display: none;" accept=".pdf,.jpg,.jpeg,.png">
+                <button class="analyze-btn" onclick="uploadLab()">Analyze Report</button>
+
+                <div id="lab-result"
+                    style="display:none; margin-top: 2rem; padding: 1.5rem; background: rgba(15, 23, 42, 0.5); border-radius: 12px;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Medicine Section -->
+        <div id="medicine-section" style="display:none;">
+            <div class="dashboard-header">
+                <h1 class="dashboard-title">Medicine Adherence Tracker</h1>
+                <p class="dashboard-subtitle">Track your medications and never miss a dose</p>
+            </div>
+
+            <button class="analyze-btn" onclick="addMedicineMock()" style="margin-bottom: 2rem;">+ Add Medicine</button>
+
+            <div id="medicine-list" class="medicine-grid"></div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/patient/login-page';
+
+    function showSection(id, element) {
+        console.log('Switching to section:', id);
+        // Update sidebar active state
+        document.querySelectorAll('.sidebar-nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        if (element) {
+            element.classList.add('active');
+        } else {
+            const link = document.querySelector(`.sidebar-nav-link[onclick*="'${id}'"]`);
+            if (link) link.classList.add('active');
+        }
+
+        // Show/hide sections
+        ['dashboard', 'chat', 'lab', 'medicine'].forEach(s => {
+            const el = document.getElementById(s + '-section');
+            if (el) {
+                el.style.display = s === id ? 'block' : 'none';
+                console.log(`Section ${s} display set to: ${el.style.display}`);
+            } else {
+                console.error(`Section element not found: ${s}-section`);
+            }
+        });
+
+        if (id === 'dashboard') loadDashboard();
+        if (id === 'medicine') loadMedicine();
+    }
+
+    async function loadDashboard() {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+        try {
+            const res = await fetch('/patient/dashboard', {
+                headers: { 'Authorization': 'Bearer ' + token },
+                signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            if (!res.ok) {
+                if (res.status === 401) {
+                    localStorage.removeItem('token');
+                    window.location.href = '/patient/login-page';
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${res.status}`);
+            }
+
+            const data = await res.json();
+
+            // Timeline
+            let timelineHtml = '<p style="color: #94a3b8;">No medical history found.</p>';
+            if (data.timeline && data.timeline.length > 0) {
+                const hasRealData = data.timeline.length > 1 || (data.timeline.length === 1 && data.timeline[0].date !== "N/A");
+                if (hasRealData) {
+                    timelineHtml = data.timeline.map(t => `
+                        <div class="timeline-item">
+                            <div class="timeline-date">${t.date}</div>
+                            <div class="timeline-type">${t.type}</div>
+                            <div class="timeline-details">${t.details}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+            document.getElementById('timeline-container').innerHTML = timelineHtml;
+
+            // Insights
+            const insights = data.insights || { risk_score: 0, survival_insight: "No data available", recommended_next_steps: [] };
+
+            let nextStepsHtml = '<li>No recommendations available</li>';
+            if (insights.recommended_next_steps && insights.recommended_next_steps.length > 0) {
+                nextStepsHtml = insights.recommended_next_steps.map(s => `<li>${s}</li>`).join('');
+            }
+
+            document.getElementById('insights-container').innerHTML = `
+                <div class="insight-metric">
+                    <span class="insight-label">Risk Score</span>
+                    <span class="insight-value">${insights.risk_score}/10</span>
+                </div>
+                <div style="padding: 1rem; background: rgba(15, 23, 42, 0.5); border-radius: 8px; margin-bottom: 1rem;">
+                    <strong style="color: #f1f5f9;">Survival Insight:</strong>
+                    <p style="color: #cbd5e1; margin-top: 0.5rem;">${insights.survival_insight}</p>
+                </div>
+                <div>
+                    <strong style="color: #f1f5f9; display: block; margin-bottom: 1rem;">Recommended Next Steps:</strong>
+                    <ul class="next-steps-list">${nextStepsHtml}</ul>
+                </div>
+            `;
+
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            document.getElementById('timeline-container').innerHTML = '<p style="color: #ef4444;">Error loading data.</p>';
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        const history = document.getElementById('chat-history');
+        history.innerHTML += `
+            <div class="chat-message user">
+                <div class="chat-bubble user">${msg}</div>
+            </div>
+        `;
+        input.value = '';
+
+        const sendBtn = document.querySelector('.chat-send-btn');
+        if (sendBtn) sendBtn.classList.add('loading');
+
+        try {
+            const formData = new FormData();
+            formData.append('message', msg);
+
+            const res = await fetch('/patient/chat', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+            const data = await res.json();
+
+            history.innerHTML += `
+                <div class="chat-message">
+                    <div class="chat-bubble bot">${data.response}</div>
+                </div>
+            `;
+            history.scrollTop = history.scrollHeight;
+        } catch (error) {
+            console.error('Error sending message:', error);
+            history.innerHTML += `
+                <div class="chat-message">
+                    <div class="chat-bubble bot" style="color: #ef4444;">Error: Could not send message.</div>
+                </div>
+            `;
+        } finally {
+            if (sendBtn) sendBtn.classList.remove('loading');
+        }
+    }
+
+    function useExample(text) {
+        const input = document.getElementById('chat-input');
+        input.value = text;
+        input.focus();
+    }
+
+    async function uploadLab() {
+        const fileInput = document.getElementById('lab-file');
+        if (!fileInput.files[0]) {
+            alert('Please select a file first');
+            return;
+        }
+
+        const analyzeBtn = document.querySelector('.analyze-btn[onclick="uploadLab()"]');
+        if (analyzeBtn) {
+            analyzeBtn.classList.add('loading');
+            analyzeBtn.innerText = 'Analyzing...';
+        }
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const res = await fetch('/patient/upload-report', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token },
+                body: formData
+            });
+            const data = await res.json();
+            console.log('Lab Report Data:', data);
+
+            const resultDiv = document.getElementById('lab-result');
+            resultDiv.style.display = 'block';
+
+            let html = '<h3 style="color: #f1f5f9; margin-bottom: 1rem;">Analysis Results</h3>';
+
+            // Handle diagnosis (check both top-level and nested)
+            let diagnosis = data.diagnosis;
+            if (!diagnosis && data.extracted_entities && data.extracted_entities.diagnosis) {
+                diagnosis = Array.isArray(data.extracted_entities.diagnosis) ?
+                    data.extracted_entities.diagnosis[0] : data.extracted_entities.diagnosis;
+            }
+            if (diagnosis) html += `<div style="margin-bottom: 1rem;"><strong>Diagnosis:</strong> ${diagnosis}</div>`;
+
+            // Handle summary
+            if (data.summary) html += `<div style="margin-bottom: 1rem;"><strong>Summary:</strong> ${data.summary}</div>`;
+
+            resultDiv.innerHTML = html;
+
+        } catch (error) {
+            console.error('Error uploading lab report:', error);
+            alert('Error uploading lab report.');
+        } finally {
+            if (analyzeBtn) {
+                analyzeBtn.classList.remove('loading');
+                analyzeBtn.innerText = 'Analyze Report';
+            }
+        }
+    }
+
+    async function addMedicineMock() {
+        try {
+            await fetch('/patient/medicine/add?drug_name=Tamoxifen&dosage=20mg&frequency=1&count=20', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            alert('Medicine added successfully!');
+            loadMedicine();
+        } catch (error) {
+            console.error('Error adding medicine:', error);
+            alert('Error adding medicine.');
+        }
+    }
+
+    async function loadMedicine() {
+        const container = document.getElementById('medicine-list');
+        const medicines = [
+            { id: 'med_1', name: 'Tamoxifen', dosage: '20mg - Once daily', cost: '₹450' },
+            { id: 'med_2', name: 'Letrozole', dosage: '2.5mg - Once daily', cost: '₹600' }
+        ];
+
+        container.innerHTML = medicines.map(med => `
+            <div class="medicine-card">
+                <div class="medicine-name">${med.name}</div>
+                <div class="medicine-dosage">${med.dosage}</div>
+                <button class="medicine-btn" id="btn-${med.id}" onclick="takeMedicine('${med.id}')">Mark as Taken</button>
+            </div>
+        `).join('');
+    }
+
+    async function takeMedicine(id) {
+        const medBtn = document.getElementById(`btn-${id}`);
+        if (medBtn) medBtn.classList.add('loading');
+
+        try {
+            await fetch('/patient/medicine/take/' + id, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (medBtn) {
+                medBtn.style.background = '#059669';
+                medBtn.innerText = 'Marked ✓';
+                medBtn.disabled = true;
+                medBtn.classList.remove('loading');
+            }
+        } catch (error) {
+            console.error('Error taking medicine:', error);
+            alert('Error marking medicine.');
+        }
+    }
+
+    // Initial load
+    loadDashboard();
+</script>
+{% endblock %}

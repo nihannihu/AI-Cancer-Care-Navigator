@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Patient Registration - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+    <section class="surface-panel fade-in-up" style="max-width: 500px; margin: 2rem auto;">
+        <h1 class="surface-title" style="text-align: center; margin-bottom: 2rem;">Create Patient Account</h1>
+
+        <form id="registerForm" style="display: flex; flex-direction: column; gap: 1.5rem;">
+            <div class="form-group">
+                <label for="username" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;" />
+            </div>
+
+            <div class="form-group">
+                <label for="email" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email</label>
+                <input type="email" id="email" name="email" placeholder="your.email@example.com" required
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;" />
+            </div>
+
+            <div class="form-group">
+                <label for="password" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a strong password" required
+                    style="width: 100%; padding: 0.75rem; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;" />
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+                Create Account
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e2e8f0;">
+            <p style="margin-bottom: 1rem; color: #64748b;">Already have an account?</p>
+            <a href="/patient/login-page" class="btn btn-secondary" style="display: inline-block;">
+                Login Here
+            </a>
+        </div>
+
+        <div id="success-message"
+            style="display: none; margin-top: 1rem; padding: 1rem; background: #efe; border: 2px solid #cfc; border-radius: 8px; color: #060;">
+        </div>
+        <div id="error-message"
+            style="display: none; margin-top: 1rem; padding: 1rem; background: #fee; border: 2px solid #fcc; border-radius: 8px; color: #c00;">
+        </div>
+    </section>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const errorDiv = document.getElementById('error-message');
+        const successDiv = document.getElementById('success-message');
+        errorDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+
+        // Add loading animation to the register button
+        const registerBtn = document.querySelector('#registerForm button[type="submit"]');
+        if (registerBtn) {
+            registerBtn.classList.add('loading');
+        }
+
+        const formData = new FormData(e.target);
+
+        try {
+            const response = await fetch('/patient/register', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                successDiv.textContent = 'Account created successfully! Redirecting to login...';
+                successDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    window.location.href = '/patient/login-page';
+                }, 2000);
+            } else {
+                const error = await response.json();
+                errorDiv.textContent = error.detail || 'Registration failed. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            errorDiv.textContent = 'An error occurred. Please try again.';
+            errorDiv.style.display = 'block';
+        } finally {
+            // Remove loading animation
+            if (registerBtn) {
+                registerBtn.classList.remove('loading');
+            }
+        }
+    });
+</script>
+{% endblock %}

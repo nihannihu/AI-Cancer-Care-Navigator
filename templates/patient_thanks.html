@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Thank You - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+  <section class="surface-panel fade-in-up">
+    <h1 class="surface-title">Thank You for Your Check-In</h1>
+    <p class="surface-body">
+      Your symptoms have been recorded in the triage system. Our care team will review your report 
+      and take appropriate action if needed.
+    </p>
+    
+    {% if alert %}
+    <div class="alert-banner urgent">
+      <strong>Attention Required:</strong> {{ alert }}
+    </div>
+    <div class="alert-banner" style="margin-top: 1.5rem;">
+      <strong>Immediate Action:</strong> Our nursing team will contact you within 30 minutes. 
+      If you haven't been contacted by then, please call our emergency hotline at <strong>1-800-CANCER</strong>.
+    </div>
+    {% else %}
+    <div class="pillar-card" style="margin-top: 1.5rem;">
+      <div class="pillar-label">What Happens Next</div>
+      <h3 class="pillar-title">Care Team Follow-Up</h3>
+      <p class="pillar-body">
+        • Your care team receives your daily symptom report<br>
+        • High symptom scores trigger alerts for follow-up<br>
+        • Continue your daily check-ins to monitor progress<br>
+        • We'll reach out if intervention is needed
+      </p>
+    </div>
+    {% endif %}
+    
+    <div style="margin-top: 2rem;">
+      <a href="/patient" class="btn">Back to Daily Check-In</a>
+      <a href="/" class="btn btn-secondary" style="margin-left: 0.75rem;">Return to Home</a>
+    </div>
+  </section>
+  
+  <section class="surface-panel fade-in-up">
+    <h2 class="surface-title">Your Health Matters</h2>
+    <p class="surface-body">
+      Regular symptom monitoring helps us provide you with the best possible care during your treatment journey.
+    </p>
+    
+    <div class="pillar-list">
+      <article class="pillar-card">
+        <div class="pillar-label">Daily Check-In Benefits</div>
+        <h3 class="pillar-title">Treatment Optimization</h3>
+        <p class="pillar-body">
+          • Early detection of treatment side effects<br>
+          • Personalized care adjustments<br>
+          • Improved treatment outcomes<br>
+          • Enhanced communication with your care team
+        </p>
+      </article>
+    </div>
+    
+    <div class="alert-banner urgent" style="margin-top: 2rem;">
+      <strong>Emergency Contact:</strong> If you're experiencing severe symptoms that require immediate attention, 
+      please contact our 24/7 Oncology Emergency Hotline at <strong>1-800-CANCER</strong> or visit your nearest emergency room.
+      <br><br>
+      <strong>When to Call Immediately:</strong> Severe pain (5), difficulty breathing, chest pain, or any symptom that feels life-threatening.
+    </div>
+  </section>
+</div>
+{% endblock %}

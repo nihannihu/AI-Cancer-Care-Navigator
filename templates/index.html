@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Home - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+  <!-- Hero Section -->
+  <section class="surface-panel fade-in-up" style="text-align: center; padding: 2rem;">
+    <h1 class="surface-title" style="font-size: 2rem; margin-bottom: 1rem;">
+      AI-Powered Cancer Detection for Rural India
+    </h1>
+    <p class="surface-body" style="font-size: 1.1rem; max-width: 800px; margin: 0 auto 1.5rem; color: var(--medical-text-secondary);">
+      Bridging the gap between rural communities and life-saving oncology care through cutting-edge AI technology
+    </p>
+    
+    <!-- Hero Actions -->
+    <div class="hero-actions" style="justify-content: center; margin-bottom: 2rem;">
+      <a href="/pcp" class="btn btn-primary" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+        🩺 Start PCP Triage
+      </a>
+      <a href="/patient" class="btn" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+        👤 Patient Portal
+      </a>
+    </div>
+    
+    <!-- How It Works - Moved under Hero -->
+    <div class="surface-panel" style="margin-top: 1rem; padding: 1.5rem; background: rgba(30, 41, 59, 0.8); border: 1px solid var(--medical-border);">
+      <h2 class="surface-title" style="text-align: center; font-size: 1.4rem; margin-bottom: 1rem;">How It Works</h2>
+      
+      <div class="steps-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+        <div class="step-card" style="text-align: center; padding: 0.8rem;">
+          <div class="step-number" style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">1</div>
+          <h3 class="step-title" style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">PCP Uploads Scan</h3>
+        </div>
+        
+        <div class="step-card" style="text-align: center; padding: 0.8rem;">
+          <div class="step-number" style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">2</div>
+          <h3 class="step-title" style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">AI Analysis</h3>
+        </div>
+        
+        <div class="step-card" style="text-align: center; padding: 0.8rem;">
+          <div class="step-number" style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">3</div>
+          <h3 class="step-title" style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">Oncologist Review</h3>
+        </div>
+        
+        <div class="step-card" style="text-align: center; padding: 0.8rem;">
+          <div class="step-number" style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">4</div>
+          <h3 class="step-title" style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">Patient Care</h3>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Key Stats -->
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 2rem 0 1rem;">
+      <div class="stat-card" style="background: rgba(37, 99, 235, 0.15); padding: 1rem; border-radius: var(--medical-radius-md); border: 1px solid rgba(59, 130, 246, 0.3);">
+        <div class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: var(--medical-primary); margin-bottom: 0.3rem;">70%</div>
+        <div class="stat-label" style="color: var(--medical-text-secondary); font-size: 0.85rem;">Rural Population Without Access</div>
+      </div>
+      <div class="stat-card" style="background: rgba(37, 99, 235, 0.15); padding: 1rem; border-radius: var(--medical-radius-md); border: 1px solid rgba(59, 130, 246, 0.3);">
+        <div class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: var(--medical-primary); margin-bottom: 0.3rem;">150+</div>
+        <div class="stat-label" style="color: var(--medical-text-secondary); font-size: 0.85rem;">Km to Nearest Cancer Center</div>
+      </div>
+      <div class="stat-card" style="background: rgba(37, 99, 235, 0.15); padding: 1rem; border-radius: var(--medical-radius-md); border: 1px solid rgba(59, 130, 246, 0.3);">
+        <div class="stat-value" style="font-size: 1.5rem; font-weight: 700; color: var(--medical-primary); margin-bottom: 0.3rem;">&lt;2</div>
+        <div class="stat-label" style="color: var(--medical-text-secondary); font-size: 0.85rem;">Minutes for AI Analysis</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="surface-panel" style="margin-top: 1.5rem;">
+    <h2 class="surface-title" style="text-align: center; margin-bottom: 1.5rem;">Why Onco-Navigator AI?</h2>
+    
+    <div class="benefits-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+      <!-- Benefit 1 -->
+      <div class="benefit-card" style="background: rgba(30, 41, 59, 0.8); padding: 1.5rem; border-radius: var(--medical-radius-md); border: 1px solid var(--medical-border); transition: transform 0.3s ease;">
+        <div class="benefit-icon" style="font-size: 2rem; margin-bottom: 0.8rem;">🤖</div>
+        <h3 class="benefit-title" style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--medical-text-primary);">Instant AI Risk Assessment</h3>
+        <p class="benefit-description" style="color: var(--medical-text-secondary); line-height: 1.5; font-size: 0.95rem;">
+          Upload mammography scans and get immediate AI-powered risk assessment. Our deep learning model detects early-stage breast cancer with high accuracy.
+        </p>
+      </div>
+      
+      <!-- Benefit 2 -->
+      <div class="benefit-card" style="background: rgba(30, 41, 59, 0.8); padding: 1.5rem; border-radius: var(--medical-radius-md); border: 1px solid var(--medical-border); transition: transform 0.3s ease;">
+        <div class="benefit-icon" style="font-size: 2rem; margin-bottom: 0.8rem;">🏥</div>
+        <h3 class="benefit-title" style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--medical-text-primary);">Tele-Oncology Bridge</h3>
+        <p class="benefit-description" style="color: var(--medical-text-secondary); line-height: 1.5; font-size: 0.95rem;">
+          Connect rural healthcare providers with urban oncologists. High-risk cases are automatically forwarded for expert review and care coordination.
+        </p>
+      </div>
+      
+      <!-- Benefit 3 -->
+      <div class="benefit-card" style="background: rgba(30, 41, 59, 0.8); padding: 1.5rem; border-radius: var(--medical-radius-md); border: 1px solid var(--medical-border); transition: transform 0.3s ease;">
+        <div class="benefit-icon" style="font-size: 2rem; margin-bottom: 0.8rem;">📱</div>
+        <h3 class="benefit-title" style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--medical-text-primary);">Patient Empowerment</h3>
+        <p class="benefit-description" style="color: var(--medical-text-secondary); line-height: 1.5; font-size: 0.95rem;">
+          Patients can track their medical history, receive personalized insights, and access care recommendations through our mobile-friendly portal.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action -->
+  <section class="surface-panel" style="margin-top: 1.5rem; text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(59, 130, 246, 0.3);">
+    <h2 class="surface-title" style="font-size: 1.7rem; margin-bottom: 1rem;">Ready to Transform Cancer Care?</h2>
+    <p class="surface-body" style="max-width: 600px; margin: 0 auto 1.5rem; color: var(--medical-text-secondary); font-size: 1rem;">
+      Join healthcare providers across rural India in delivering life-saving cancer detection and care.
+    </p>
+    <div class="cta-actions" style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+      <a href="/pcp" class="btn btn-primary" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+        🩺 Get Started as PCP
+      </a>
+      <a href="/oncologist" class="btn" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+        👨‍⚕️ Oncologist Login
+      </a>
+    </div>
+  </section>
+</div>
+
+<style>
+  .benefit-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  @media (max-width: 768px) {
+    .hero-actions, .cta-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .hero-actions .btn, .cta-actions .btn {
+      width: 100%;
+      max-width: 300px;
+      margin-bottom: 1rem;
+    }
+  }
+</style>
+{% endblock %}

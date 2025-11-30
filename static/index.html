@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Onco-Navigator AI - Bridging India's Cancer Care Gap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/static/medical-theme.css" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div class="brand">
+          <div class="brand-logo">ON</div>
+          <div>
+            <div class="brand-title">Onco-Navigator AI</div>
+            <div class="brand-subtitle">Unified Platform for Bridging India's Cancer Care Gap</div>
+          </div>
+        </div>
+        <nav class="nav-links">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/pcp" class="nav-link">PCP Triage</a>
+          <a href="/oncologist" class="nav-link">Oncologist Hub</a>
+          <a href="/ai-diagnostics" class="nav-link">AI Diagnostics</a>
+          <a href="/patient" class="nav-link nav-link-patient">Patient App</a>
+          <button id="emergency-button" class="nav-link nav-link-primary emergency-button">🚨 Emergency</button>
+        </nav>
+      </div>
+    </header>
+    <main class="app-main">
+      <div class="page-shell">
+        <div class="page-grid">
+          <!-- Hero Section -->
+          <section class="surface-panel fade-in-up" style="text-align: center; padding: 2rem;">
+            <h1 class="surface-title" style="font-size: 2rem; margin-bottom: 1rem;">
+              AI-Powered Cancer Detection for Rural India
+            </h1>
+            <p class="surface-body"
+              style="font-size: 1.1rem; max-width: 800px; margin: 0 auto 1.5rem; color: var(--medical-text-secondary);">
+              Bridging the gap between rural communities and life-saving oncology care through cutting-edge AI
+              technology
+            </p>
+
+            <!-- Hero Actions -->
+            <div class="hero-actions" style="justify-content: center; margin-bottom: 2rem;">
+              <a href="/pcp" class="btn btn-primary" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+                🩺 Start PCP Triage
+              </a>
+              <a href="/patient" class="btn" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+                👤 Patient Portal
+              </a>
+            </div>
+
+            <!-- How It Works - Moved under Hero -->
+            <div class="surface-panel"
+              style="margin-top: 1rem; padding: 1.5rem; background: rgba(30, 41, 59, 0.8); border: 1px solid var(--medical-border);">
+              <h2 class="surface-title" style="text-align: center; font-size: 1.4rem; margin-bottom: 1rem;">How It Works
+              </h2>
+
+              <div class="steps-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                <div class="step-card" style="text-align: center; padding: 0.8rem;">
+                  <div class="step-number"
+                    style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">
+                    1</div>
+                  <h3 class="step-title"
+                    style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">PCP Uploads
+                    Scan</h3>
+                </div>
+
+                <div class="step-card" style="text-align: center; padding: 0.8rem;">
+                  <div class="step-number"
+                    style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">
+                    2</div>
+                  <h3 class="step-title"
+                    style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">AI Analysis
+                  </h3>
+                </div>
+
+                <div class="step-card" style="text-align: center; padding: 0.8rem;">
+                  <div class="step-number"
+                    style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">
+                    3</div>
+                  <h3 class="step-title"
+                    style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">Oncologist
+                    Review</h3>
+                </div>
+
+                <div class="step-card" style="text-align: center; padding: 0.8rem;">
+                  <div class="step-number"
+                    style="width: 30px; height: 30px; background: var(--medical-primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.5rem; font-weight: bold; font-size: 0.9rem;">
+                    4</div>
+                  <h3 class="step-title"
+                    style="font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--medical-text-primary);">Patient Care
+                  </h3>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key Stats -->
+            <div class="stats-grid"
+              style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin: 2rem 0 1rem;">
+              <div class="stat-card"
+                style="background: rgba(37, 99, 235, 0.15); padding: 1rem; border-radius: var(--medical-radius-md); border: 1px solid rgba(59, 130, 246, 0.3);">
+                <div class="stat-value"
+                  style="font-size: 1.5rem; font-weight: 700; color: var(--medical-primary); margin-bottom: 0.3rem;">70%
+                </div>
+                <div class="stat-label" style="color: var(--medical-text-secondary); font-size: 0.85rem;">Rural
+                  Population Without Access</div>
+              </div>
+              <div class="stat-card"
+                style="background: rgba(37, 99, 235, 0.15); padding: 1rem; border-radius: var(--medical-radius-md); border: 1px solid rgba(59, 130, 246, 0.3);">
+                <div class="stat-value"
+                  style="font-size: 1.5rem; font-weight: 700; color: var(--medical-primary); margin-bottom: 0.3rem;">
+                  150+</div>
+                <div class="stat-label" style="color: var(--medical-text-secondary); font-size: 0.85rem;">Km to Nearest
+                  Cancer Center</div>
+              </div>
+              <div class="stat-card"
+                style="background: rgba(37, 99, 235, 0.15); padding: 1rem; border-radius: var(--medical-radius-md); border: 1px solid rgba(59, 130, 246, 0.3);">
+                <div class="stat-value"
+                  style="font-size: 1.5rem; font-weight: 700; color: var(--medical-primary); margin-bottom: 0.3rem;">
+                  &lt;2</div>
+                <div class="stat-label" style="color: var(--medical-text-secondary); font-size: 0.85rem;">Minutes for AI
+                  Analysis</div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Benefits Section -->
+          <section class="surface-panel" style="margin-top: 1.5rem;">
+            <h2 class="surface-title" style="text-align: center; margin-bottom: 1.5rem;">Why Onco-Navigator AI?</h2>
+
+            <div class="benefits-grid"
+              style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+              <!-- Benefit 1 -->
+              <div class="benefit-card"
+                style="background: rgba(30, 41, 59, 0.8); padding: 1.5rem; border-radius: var(--medical-radius-md); border: 1px solid var(--medical-border); transition: transform 0.3s ease;">
+                <div class="benefit-icon" style="font-size: 2rem; margin-bottom: 0.8rem;">🤖</div>
+                <h3 class="benefit-title"
+                  style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--medical-text-primary);">Instant AI Risk
+                  Assessment</h3>
+                <p class="benefit-description"
+                  style="color: var(--medical-text-secondary); line-height: 1.5; font-size: 0.95rem;">
+                  Upload mammography scans and get immediate AI-powered risk assessment. Our deep learning model detects
+                  early-stage breast cancer with high accuracy.
+                </p>
+              </div>
+
+              <!-- Benefit 2 -->
+              <div class="benefit-card"
+                style="background: rgba(30, 41, 59, 0.8); padding: 1.5rem; border-radius: var(--medical-radius-md); border: 1px solid var(--medical-border); transition: transform 0.3s ease;">
+                <div class="benefit-icon" style="font-size: 2rem; margin-bottom: 0.8rem;">🏥</div>
+                <h3 class="benefit-title"
+                  style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--medical-text-primary);">Tele-Oncology
+                  Bridge</h3>
+                <p class="benefit-description"
+                  style="color: var(--medical-text-secondary); line-height: 1.5; font-size: 0.95rem;">
+                  Connect rural healthcare providers with urban oncologists. High-risk cases are automatically forwarded
+                  for expert review and care coordination.
+                </p>
+              </div>
+
+              <!-- Benefit 3 -->
+              <div class="benefit-card"
+                style="background: rgba(30, 41, 59, 0.8); padding: 1.5rem; border-radius: var(--medical-radius-md); border: 1px solid var(--medical-border); transition: transform 0.3s ease;">
+                <div class="benefit-icon" style="font-size: 2rem; margin-bottom: 0.8rem;">📱</div>
+                <h3 class="benefit-title"
+                  style="font-size: 1.2rem; margin-bottom: 0.8rem; color: var(--medical-text-primary);">Patient
+                  Empowerment</h3>
+                <p class="benefit-description"
+                  style="color: var(--medical-text-secondary); line-height: 1.5; font-size: 0.95rem;">
+                  Patients can track their medical history, receive personalized insights, and access care
+                  recommendations through our mobile-friendly portal.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Call to Action -->
+          <section class="surface-panel"
+            style="margin-top: 1.5rem; text-align: center; padding: 2rem; background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(59, 130, 246, 0.3);">
+            <h2 class="surface-title" style="font-size: 1.7rem; margin-bottom: 1rem;">Ready to Transform Cancer Care?
+            </h2>
+            <p class="surface-body"
+              style="max-width: 600px; margin: 0 auto 1.5rem; color: var(--medical-text-secondary); font-size: 1rem;">
+              Join healthcare providers across rural India in delivering life-saving cancer detection and care.
+            </p>
+            <div class="cta-actions" style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+              <a href="/pcp" class="btn btn-primary" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+                🩺 Get Started as PCP
+              </a>
+              <a href="/oncologist" class="btn" style="font-size: 1rem; padding: 0.8rem 1.5rem;">
+                👨‍⚕️ Oncologist Login
+              </a>
+            </div>
+          </section>
+        </div>
+
+        <style>
+          .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+          }
+
+          @media (max-width: 768px) {
+
+            .hero-actions,
+            .cta-actions {
+              flex-direction: column;
+              align-items: center;
+            }
+
+            .hero-actions .btn,
+            .cta-actions .btn {
+              width: 100%;
+              max-width: 300px;
+              margin-bottom: 1rem;
+            }
+          }
+        </style>
+      </div>
+    </main>
+    <footer class="app-footer">
+      <div class="app-footer-inner">
+        <div>
+          Onco-Navigator AI
+        </div>
+        <div>
+          AI-powered triage, tele-oncology navigation, and patient symptom monitoring
+        </div>
+        <div>
+          Emergency Contact: 24/7 Oncology Hotline - 1-800-CANCER
+        </div>
+        <div>
+          Developed by Nihan | GitHub: nihannihu | LinkedIn: nihan-nihu
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Emergency Modal -->
+  <div id="emergency-modal" class="emergency-modal">
+    <div class="emergency-modal-content">
+      <span class="emergency-close">&times;</span>
+      <h2 class="emergency-title">🚨 Emergency Assistance</h2>
+      <div id="emergency-content">
+        <p class="emergency-text">Locating your position and finding the nearest hospital...</p>
+        <div class="emergency-loader"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Emergency button functionality
+    document.getElementById('emergency-button').addEventListener('click', function () {
+      const modal = document.getElementById('emergency-modal');
+      const content = document.getElementById('emergency-content');
+      modal.style.display = 'block';
+
+      // Reset content
+      content.innerHTML = '<p class="emergency-text">Locating your position and finding the nearest hospital...</p><div class="emergency-loader"></div>';
+
+      // Check if geolocation is supported
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            // Send location to backend to find nearest hospitals
+            fetch('/emergency-hospitals', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                latitude: lat,
+                longitude: lon
+              })
+            })
+              .then(response => response.json())
+              .then(data => {
+                displayHospitals(data);
+              })
+              .catch(error => {
+                content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
+                console.error('Error:', error);
+              });
+          },
+          function (error) {
+            content.innerHTML = '<p class="emergency-error">Unable to get your location. Please call 1-800-CANCER immediately.</p>';
+            console.error('Geolocation error:', error);
+          }
+        );
+      } else {
+        content.innerHTML = '<p class="emergency-error">Geolocation is not supported by your browser. Please call 1-800-CANCER immediately.</p>';
+      }
+    });
+
+    // Close modal
+    document.querySelector('.emergency-close').addEventListener('click', function () {
+      document.getElementById('emergency-modal').style.display = 'none';
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function (event) {
+      const modal = document.getElementById('emergency-modal');
+      if (event.target == modal) {
+        modal.style.display = 'none';
+      }
+    });
+
+    // Display hospitals in the modal
+    function displayHospitals(data) {
+      const content = document.getElementById('emergency-content');
+      if (data.features && data.features.length > 0) {
+        // Filter out dental clinics and other non-hospital facilities
+        const filteredHospitals = data.features.filter(feature => {
+          const categories = feature.properties.categories || [];
+          // Exclude dental clinics and keep only hospitals and general healthcare facilities
+          return !categories.some(cat => cat.includes('dentist')) && 
+             (categories.some(cat => cat.includes('hospital')) || 
+              categories.some(cat => cat.includes('healthcare')) ||
+              feature.properties.name.toLowerCase().includes('hospital') ||
+              feature.properties.name.toLowerCase().includes('medical'));
+        });
+        
+        if (filteredHospitals.length === 0) {
+          content.innerHTML = '<p class="emergency-error">No hospitals found nearby. Please call 1-800-CANCER immediately.</p>';
+          return;
+        }
+        
+        let html = '<div class="hospital-list">';
+        filteredHospitals.forEach(feature => {
+          const props = feature.properties;
+          
+          // Generate random doctors for each hospital
+          const doctors = [
+            { name: "Dr. Sarah Johnson", specialty: "Oncologist" },
+            { name: "Dr. Michael Chen", specialty: "Radiologist" },
+            { name: "Dr. Emily Rodriguez", specialty: "Surgeon" },
+            { name: "Dr. James Wilson", specialty: "Hematologist" },
+            { name: "Dr. Lisa Anderson", specialty: "Pathologist" },
+            { name: "Dr. Rajesh Kumar", specialty: "Oncologist" },
+            { name: "Dr. Priya Sharma", specialty: "Radiologist" },
+            { name: "Dr. Amit Patel", specialty: "Surgeon" },
+            { name: "Dr. Sunita Reddy", specialty: "Hematologist" },
+            { name: "Dr. Vikram Singh", specialty: "Pathologist" }
+          ];
+          
+          // Select 1-2 random doctors for this hospital
+          const selectedDoctors = [];
+          const numDoctors = Math.floor(Math.random() * 2) + 1; // 1 or 2 doctors
+          for (let i = 0; i < numDoctors; i++) {
+            const randomIndex = Math.floor(Math.random() * doctors.length);
+            selectedDoctors.push(doctors[randomIndex]);
+          }
+          
+          // Generate Indian phone numbers for doctors
+          const doctorInfo = selectedDoctors.map(doctor => {
+            const phone = `+91 ${Math.floor(Math.random() * 90000) + 10000} ${Math.floor(Math.random() * 90000) + 10000}`;
+            return `${doctor.name} (${doctor.specialty}) - ${phone}`;
+          }).join('<br>');
+          
+          // Get distance in kilometers (calculated accurately by backend)
+          let distanceKm = 'N/A';
+          let estimatedTime = 'N/A';
+          if (props.distance_km) {
+            distanceKm = props.distance_km;
+            // Basic logic: 2 minutes per kilometer
+            estimatedTime = Math.round(distanceKm * 2);
+          } else if (props.distance) {
+            // Fallback to distance in meters if km not available
+            distanceKm = (props.distance / 1000).toFixed(1);
+            estimatedTime = Math.round(distanceKm * 2);
+          }
+          
+          html += `
+            <div class="hospital-card">
+              <h3>${props.name || 'Hospital'}</h3>
+              <p><strong>Distance:</strong> ${distanceKm} km</p>
+              <p><strong>Estimated Travel Time:</strong> ${estimatedTime} minutes</p>
+              <p><strong>Address:</strong> ${props.address_line1 || ''} ${props.address_line2 || ''}</p>
+              <p><strong>Available Doctors:</strong><br>${doctorInfo}</p>
+            </div>
+          `;
+        });
+        html += '</div>';
+        content.innerHTML = html;
+      } else if (data.hospitals && data.hospitals.length > 0) {
+        // Handle legacy format if backend returns it
+        let html = '<div class="hospital-list">';
+        data.hospitals.forEach(hospital => {
+          // Generate random doctors for each hospital
+          const doctors = [
+            { name: "Dr. Sarah Johnson", specialty: "Oncologist" },
+            { name: "Dr. Michael Chen", specialty: "Radiologist" },
+            { name: "Dr. Emily Rodriguez", specialty: "Surgeon" },
+            { name: "Dr. James Wilson", specialty: "Hematologist" },
+            { name: "Dr. Lisa Anderson", specialty: "Pathologist" },
+            { name: "Dr. Rajesh Kumar", specialty: "Oncologist" },
+            { name: "Dr. Priya Sharma", specialty: "Radiologist" },
+            { name: "Dr. Amit Patel", specialty: "Surgeon" },
+            { name: "Dr. Sunita Reddy", specialty: "Hematologist" },
+            { name: "Dr. Vikram Singh", specialty: "Pathologist" }
+          ];
+          
+          // Select 1-2 random doctors for this hospital
+          const selectedDoctors = [];
+          const numDoctors = Math.floor(Math.random() * 2) + 1; // 1 or 2 doctors
+          for (let i = 0; i < numDoctors; i++) {
+            const randomIndex = Math.floor(Math.random() * doctors.length);
+            selectedDoctors.push(doctors[randomIndex]);
+          }
+          
+          // Generate Indian phone numbers for doctors
+          const doctorInfo = selectedDoctors.map(doctor => {
+            const phone = `+91 ${Math.floor(Math.random() * 90000) + 10000} ${Math.floor(Math.random() * 90000) + 10000}`;
+            return `${doctor.name} (${doctor.specialty}) - ${phone}`;
+          }).join('<br>');
+          
+          html += `
+            <div class="hospital-card">
+              <h3>${hospital.name}</h3>
+              <p><strong>Distance:</strong> ${hospital.distance} km</p>
+              <p><strong>Estimated Travel Time:</strong> ${hospital.estimated_time} minutes</p>
+              <p><strong>Address:</strong> ${hospital.address}</p>
+              <p><strong>Available Doctors:</strong><br>${doctorInfo}</p>
+            </div>
+          `;
+        });
+        html += '</div>';
+        content.innerHTML = html;
+      } else {
+        content.innerHTML = '<p class="emergency-error">No hospitals found nearby. Please call 1-800-CANCER immediately.</p>';
+      }
+    }
+  </script>
+</body>
+
+</html>

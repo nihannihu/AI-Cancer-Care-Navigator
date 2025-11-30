@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Onco-Navigator AI - Bridging India's Cancer Care Gap{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="/static/medical-theme.css" />
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🩺</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="app-header-inner">
+        <div class="brand">
+          <div class="brand-logo">ON</div>
+          <div>
+            <div class="brand-title">Onco-Navigator AI</div>
+            <div class="brand-subtitle">Unified Platform for Bridging India's Cancer Care Gap</div>
+          </div>
+        </div>
+        <nav class="nav-links">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/pcp" class="nav-link">PCP Triage</a>
+          <a href="/oncologist" class="nav-link">Oncologist Hub</a>
+          <a href="/ai-diagnostics" class="nav-link">AI Diagnostics</a>
+          <a href="/patient" class="nav-link nav-link-patient">Patient App</a>
+          <button id="emergency-button" class="btn nav-link nav-link-primary emergency-button">🚨 Emergency</button>
+          <button id="ambulance-button" class="btn nav-link nav-link-primary ambulance-button"
+            style="background-color: #dc2626; margin-left: 10px;">🚑 Book Ambulance</button>
+        </nav>
+      </div>
+    </header>
+    <main class="app-main">
+      <div class="page-shell">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+    <footer class="app-footer">
+      <div class="app-footer-inner">
+        <div>
+          Onco-Navigator AI
+        </div>
+        <div>
+          AI-powered triage, tele-oncology navigation, and patient symptom monitoring
+        </div>
+        <div>
+          Emergency Contact: 24/7 Oncology Hotline - 1-800-CANCER
+        </div>
+        <div>
+          Developed by Nihan | GitHub: nihannihu | LinkedIn: nihan-nihu
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Emergency Modal -->
+  <div id="emergency-modal" class="emergency-modal">
+    <div class="emergency-modal-content">
+      <span class="emergency-close">&times;</span>
+      <h2 class="emergency-title">🚨 Emergency Assistance</h2>
+      <div id="emergency-content">
+        <p class="emergency-text">Locating your position and finding the nearest hospital...</p>
+        <div class="emergency-loader"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ambulance Booking Modal -->
+  <div id="ambulance-modal" class="emergency-modal">
+    <div class="emergency-modal-content" style="max-width: 500px;">
+      <span class="ambulance-close"
+        style="position:absolute; right:20px; top:15px; font-size:28px; cursor:pointer; color: #64748b;">&times;</span>
+      <h2 class="emergency-title" style="color: #dc2626;">🚑 Book Smart Ambulance</h2>
+
+      <div id="ambulance-loading" style="text-align:center; padding:20px;">
+        <div class="emergency-loader"></div>
+        <p style="margin-top:15px; color: #64748b;">Triaging & Finding Nearest Ambulance...</p>
+      </div>
+
+      <div id="ambulance-result" style="display:none;">
+        <div class="priority-banner"
+          style="background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fca5a5; display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 1.5em;">🚨</span>
+          <div>
+            <div style="font-weight: bold; font-size: 1.1em;" id="amb-priority">Priority 1</div>
+            <div style="font-size: 0.9em;" id="amb-desc">Life Threatening</div>
+          </div>
+        </div>
+
+        <div class="hospital-info"
+          style="margin-bottom: 25px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <h3 style="margin:0 0 5px 0; color: #1e293b; font-size: 1.1em;">Recommended: <span id="amb-hospital">City
+              Cancer Center</span></h3>
+          <div style="display: flex; gap: 15px; color: #64748b; font-size: 0.95em; margin-bottom: 8px;">
+            <span>📍 <span id="amb-dist">8.2 km</span></span>
+            <span>⏱️ <span id="amb-eta">14 min</span></span>
+          </div>
+          <div style="font-size: 0.9em; color: #059669; display: flex; align-items: center; gap: 5px;">
+            <span>✓</span> Oncology Bed Available
+          </div>
+        </div>
+
+        <div class="action-grid" style="display: grid; gap: 12px;">
+          <a href="tel:108" id="call-108-btn" class="btn"
+            style="background: #ef4444; color: white; text-align: center; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600;">
+            📞 Call 108 (Direct)
+          </a>
+          <a id="amb-whatsapp-btn" href="#" target="_blank" class="btn"
+            style="background: #25D366; color: white; text-align: center; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600;">
+            💬 Book via WhatsApp
+          </a>
+          <a id="amb-track-btn" href="#" class="btn"
+            style="background: #3b82f6; color: white; text-align: center; text-decoration: none; padding: 14px; border-radius: 8px; font-weight: 600;">
+            📍 Track Status
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Emergency button functionality
+    document.getElementById('emergency-button').addEventListener('click', function () {
+      const emergencyBtn = document.getElementById('emergency-button');
+      // Add loading animation to the emergency button
+      emergencyBtn.classList.add('loading');
+
+      const modal = document.getElementById('emergency-modal');
+      const content = document.getElementById('emergency-content');
+      modal.style.display = 'block';
+
+      // Reset content
+      content.innerHTML = '<p class="emergency-text">Finding nearest hospitals...</p><div class="emergency-loader"></div><p style="text-align:center; margin-top:10px; font-size:0.9rem; color:#cbd5e1;">Accessing emergency network...</p>';
+
+      function fetchHospitals(lat, lon) {
+        console.log('Sending location to backend:', { latitude: lat, longitude: lon });
+
+        // Send location to backend to find nearest hospitals
+        // If lat/lon are null, backend will use mock data
+        fetch('/emergency-hospitals', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            latitude: lat,
+            longitude: lon
+          })
+        })
+          .then(response => {
+            console.log('Backend response status:', response.status);
+            // Check content type before parsing JSON
+            const contentType = response.headers.get('content-type');
+            console.log('Response content type:', contentType);
+            if (!contentType || !contentType.includes('application/json')) {
+              throw new Error('Invalid response from server. Expected JSON but got ' + contentType);
+            }
+
+            // Check if response is OK before parsing JSON
+            if (!response.ok) {
+              return response.json().then(errorData => {
+                throw new Error(errorData.error || 'Unknown error occurred');
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('Received data from backend:', data);
+            if (data.error) {
+              throw new Error(data.error);
+            }
+            displayHospitals(data);
+          })
+          .catch(error => {
+            console.error('Error in fetchHospitals:', error);
+            content.innerHTML = '<p class="emergency-error">Error finding hospitals. Please call 1-800-CANCER immediately.</p><p class="emergency-error">Details: ' + error.message + '</p>';
+            console.error('Error:', error);
+          })
+          .finally(() => {
+            // Remove loading animation from the emergency button
+            emergencyBtn.classList.remove('loading');
+          });
+      }
+
+      // Check if geolocation is supported
+      if (navigator.geolocation) {
+        console.log('Geolocation is supported, requesting position...');
+        navigator.geolocation.getCurrentPosition(
+          function (position) {
+            console.log('Geolocation success, position:', position);
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            console.log('User location:', { latitude: lat, longitude: lon });
+            fetchHospitals(lat, lon);
+          },
+          function (error) {
+            console.warn('Geolocation failed:', error);
+            console.warn('Geolocation failed, falling back to default location:', error);
+            // Fallback to backend without location (will use mock data)
+            fetchHospitals(null, null);
+          },
+          {
+            timeout: 10000, // 10 seconds timeout
+            enableHighAccuracy: true,
+            maximumAge: 0
+          }
+        );
+      } else {
+        console.warn('Geolocation not supported, falling back to default location');
+        // Fallback to backend without location
+        fetchHospitals(null, null);
+      }
+    });
+
+    // Display hospitals in the modal
+    function displayHospitals(data) {
+      const content = document.getElementById('emergency-content');
+      console.log('Displaying hospitals data:', data); // Debug output
+      if (data.features && data.features.length > 0) {
+        // Filter out dental clinics and other non-hospital facilities
+        const filteredHospitals = data.features.filter(feature => {
+          const props = feature.properties;
+          const categories = props.categories || [];
+
+          // Debug output
+          console.log('Hospital:', props.name, 'Categories:', categories);
+
+          // Include hospitals and general healthcare facilities
+          // Be more inclusive in our filtering
+          const isHospital = categories.some(cat =>
+            cat.includes('hospital') ||
+            cat.includes('healthcare') ||
+            (props.name && (
+              props.name.toLowerCase().includes('hospital') ||
+              props.name.toLowerCase().includes('medical center') ||
+              props.name.toLowerCase().includes('medical centre') ||
+              props.name.toLowerCase().includes('clinic')
+            ))
+          );
+
+          // Exclude dental clinics specifically
+          const isDental = categories.some(cat => cat.includes('dentist'));
+
+          console.log('Is hospital:', isHospital, 'Is dental:', isDental);
+          return isHospital && !isDental;
+        });
+
+        console.log('Filtered hospitals:', filteredHospitals.length);
+
+        if (filteredHospitals.length === 0) {
+          content.innerHTML = '<p class="emergency-error">No hospitals found nearby. Please call 1-800-CANCER immediately.</p>';
+          return;
+        }
+
+        let html = '<div class="hospital-list">';
+        filteredHospitals.forEach(feature => {
+          const props = feature.properties;
+
+          // Generate random doctors for each hospital
+          const doctors = [
+            { name: "Dr. Sarah Johnson", specialty: "Oncologist" },
+            { name: "Dr. Michael Chen", specialty: "Radiologist" },
+            { name: "Dr. Emily Rodriguez", specialty: "Surgeon" },
+            { name: "Dr. James Wilson", specialty: "Hematologist" },
+            { name: "Dr. Lisa Anderson", specialty: "Pathologist" },
+            { name: "Dr. Rajesh Kumar", specialty: "Oncologist" },
+            { name: "Dr. Priya Sharma", specialty: "Radiologist" },
+            { name: "Dr. Amit Patel", specialty: "Surgeon" },
+            { name: "Dr. Sunita Reddy", specialty: "Hematologist" },
+            { name: "Dr. Vikram Singh", specialty: "Pathologist" }
+          ];
+
+          // Select 1-2 random doctors for this hospital
+          const selectedDoctors = [];
+          const numDoctors = Math.floor(Math.random() * 2) + 1; // 1 or 2 doctors
+          for (let i = 0; i < numDoctors; i++) {
+            const randomIndex = Math.floor(Math.random() * doctors.length);
+            selectedDoctors.push(doctors[randomIndex]);
+          }
+
+          // Generate Indian phone numbers for doctors
+          const doctorInfo = selectedDoctors.map(doctor => {
+            const phone = `+91 ${Math.floor(Math.random() * 90000) + 10000} ${Math.floor(Math.random() * 90000) + 10000}`;
+            return `${doctor.name} (${doctor.specialty}) - ${phone}`;
+          }).join('<br>');
+
+          // Get distance in kilometers (calculated accurately by backend)
+          let distanceKm = 'N/A';
+          let estimatedTime = 'N/A';
+          if (props.distance_km) {
+            distanceKm = props.distance_km;
+            // Basic logic: 2 minutes per kilometer
+            estimatedTime = Math.round(distanceKm * 2);
+          } else if (props.distance) {
+            // Fallback to distance in meters if km not available
+            distanceKm = (props.distance / 1000).toFixed(1);
+            estimatedTime = Math.round(distanceKm * 2);
+          }
+
+          // Get address information
+          let addressLine1 = props.address_line1 || '';
+          let addressLine2 = props.address_line2 || '';
+          let formattedAddress = props.formatted || '';
+
+          // Use formatted address if individual lines are not available
+          if (!addressLine1 && !addressLine2 && formattedAddress) {
+            addressLine1 = formattedAddress;
+          }
+
+          html += `
+            <div class="hospital-card">
+              <h3>${props.name || 'Hospital'}</h3>
+              <p><strong>Distance:</strong> ${distanceKm} km</p>
+              <p><strong>Estimated Travel Time:</strong> ${estimatedTime} minutes</p>
+              <p><strong>Address:</strong> ${addressLine1} ${addressLine2}</p>
+              <p><strong>Available Doctors:</strong><br>${doctorInfo}</p>
+            </div>
+          `;
+        });
+        html += '</div>';
+        content.innerHTML = html;
+      } else if (data.hospitals && data.hospitals.length > 0) {
+        // Handle legacy format if backend returns it
+        let html = '<div class="hospital-list">';
+        data.hospitals.forEach(hospital => {
+          // Generate random doctors for each hospital
+          const doctors = [
+            { name: "Dr. Sarah Johnson", specialty: "Oncologist" },
+            { name: "Dr. Michael Chen", specialty: "Radiologist" },
+            { name: "Dr. Emily Rodriguez", specialty: "Surgeon" },
+            { name: "Dr. James Wilson", specialty: "Hematologist" },
+            { name: "Dr. Lisa Anderson", specialty: "Pathologist" },
+            { name: "Dr. Rajesh Kumar", specialty: "Oncologist" },
+            { name: "Dr. Priya Sharma", specialty: "Radiologist" },
+            { name: "Dr. Amit Patel", specialty: "Surgeon" },
+            { name: "Dr. Sunita Reddy", specialty: "Hematologist" },
+            { name: "Dr. Vikram Singh", specialty: "Pathologist" }
+          ];
+
+          // Select 1-2 random doctors for this hospital
+          const selectedDoctors = [];
+          const numDoctors = Math.floor(Math.random() * 2) + 1; // 1 or 2 doctors
+          for (let i = 0; i < numDoctors; i++) {
+            const randomIndex = Math.floor(Math.random() * doctors.length);
+            selectedDoctors.push(doctors[randomIndex]);
+          }
+
+          // Generate Indian phone numbers for doctors
+          const doctorInfo = selectedDoctors.map(doctor => {
+            const phone = `+91 ${Math.floor(Math.random() * 90000) + 10000} ${Math.floor(Math.random() * 90000) + 10000}`;
+            return `${doctor.name} (${doctor.specialty}) - ${phone}`;
+          }).join('<br>');
+
+          html += `
+            <div class="hospital-card">
+              <h3>${hospital.name}</h3>
+              <p><strong>Distance:</strong> ${hospital.distance} km</p>
+              <p><strong>Estimated Travel Time:</strong> ${hospital.estimated_time} minutes</p>
+              <p><strong>Address:</strong> ${hospital.address}</p>
+              <p><strong>Available Doctors:</strong><br>${doctorInfo}</p>
+            </div>
+          `;
+        });
+        html += '</div>';
+        content.innerHTML = html;
+      } else {
+        content.innerHTML = '<p class="emergency-error">No hospitals found nearby. Please call 1-800-CANCER immediately.</p>';
+      }
+    }
+
+    // Modal close logic
+    document.querySelector('.emergency-close').addEventListener('click', function () {
+      document.getElementById('emergency-modal').style.display = 'none';
+    });
+
+    window.onclick = function (event) {
+      if (event.target == document.getElementById('emergency-modal')) {
+        document.getElementById('emergency-modal').style.display = 'none';
+      }
+      if (event.target == document.getElementById('ambulance-modal')) {
+        document.getElementById('ambulance-modal').style.display = 'none';
+      }
+    }
+
+    // Ambulance Button Logic
+    document.getElementById('ambulance-button').addEventListener('click', function () {
+      const modal = document.getElementById('ambulance-modal');
+      const loading = document.getElementById('ambulance-loading');
+      const result = document.getElementById('ambulance-result');
+
+      modal.style.display = 'block';
+      loading.style.display = 'block';
+      result.style.display = 'none';
+
+      // Get Location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(success, error);
+      } else {
+        // Fallback
+        fetchAmbulanceData(null, null);
+      }
+
+      function success(position) {
+        fetchAmbulanceData(position.coords.latitude, position.coords.longitude);
+      }
+
+      function error() {
+        fetchAmbulanceData(null, null);
+      }
+
+      function fetchAmbulanceData(lat, lng) {
+        fetch('/api/book-ambulance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ latitude: lat, longitude: lng })
+        })
+          .then(res => res.json())
+          .then(data => {
+            loading.style.display = 'none';
+            result.style.display = 'block';
+
+            // Update UI
+            document.getElementById('amb-priority').innerText = data.priority;
+            document.getElementById('amb-desc').innerText = data.priority_desc;
+            document.getElementById('amb-hospital').innerText = data.hospital.name;
+            document.getElementById('amb-dist').innerText = data.hospital.distance;
+            document.getElementById('amb-eta').innerText = data.hospital.eta;
+
+            document.getElementById('amb-whatsapp-btn').href = data.whatsapp_url;
+            document.getElementById('amb-track-btn').href = data.tracking_url;
+          })
+          .catch(err => {
+            console.error(err);
+            alert('Error connecting to emergency service. Please call 108.');
+          });
+      }
+    });
+
+    document.querySelector('.ambulance-close').addEventListener('click', function () {
+      document.getElementById('ambulance-modal').style.display = 'none';
+    });
+
+    // Call 108 Simulation (Smart Handler)
+    document.getElementById('call-108-btn').addEventListener('click', function (e) {
+      // Check if device is likely mobile
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        // Allow default behavior (open dialer)
+        return;
+      }
+
+      // On desktop/laptop, simulate the call to avoid errors
+      e.preventDefault();
+      alert('Simulating call to Emergency Services (108)... \n\n(On a mobile device, this would open your phone dialer.)');
+    });
+
+    // WhatsApp Button Handler (Explicit)
+    document.getElementById('amb-whatsapp-btn').addEventListener('click', function (e) {
+      const url = this.getAttribute('href');
+      if (!url || url === '#' || url === '') {
+        e.preventDefault();
+        alert('Error: WhatsApp link not generated yet. Please try again.');
+      }
+      // Otherwise allow default behavior (target="_blank" handles it)
+    });
+  </script>
+</body>
+
+</html>

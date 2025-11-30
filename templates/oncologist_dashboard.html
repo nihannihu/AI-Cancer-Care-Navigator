@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+{% block title %}Oncologist Hub - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+  <section class="surface-panel fade-in-up">
+    <h1 class="surface-title">Oncologist Worklist</h1>
+    <p class="surface-body">
+      Review AI-flagged mammography cases forwarded from PCPs. Mark them as reviewed or 
+      clear the entire worklist when you want to reset the queue.
+    </p>
+
+    {% if cases %}
+    <div class="toolbar">
+      <div class="toolbar-title">{{ cases|length }} case(s) in queue</div>
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <form action="/oncologist/clear" method="post" onsubmit="return confirm('Clear all cases from the worklist and database?');" style="margin: 0;">
+          <button class="btn btn-danger" type="submit">Clear Worklist</button>
+        </form>
+        <a href="/oncologist/patient-symptoms" class="btn btn-secondary">View Patient Symptoms</a>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Case ID</th>
+            <th>Patient Name</th>
+            <th>Image</th>
+            <th>Medical Analysis</th>
+            <th>Risk Assessment</th>
+            <th>Simulated Stage</th>
+            <th>Risk Score</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in cases %}
+          <tr>
+            <td>{{ c.case_id }}</td>
+            <td>{{ c.patient_name }}</td>
+            <td>
+              {% if c.image_url %}
+              <a href="{{ c.image_url }}" target="_blank" rel="noopener">
+                <img src="{{ c.image_url }}" alt="Scan {{ c.case_id }}" class="case-thumb" />
+              </a>
+              {% else %}
+              <span class="surface-body" style="font-size:0.8rem;">No image</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if c.medical_analysis %}
+                {% if c.medical_analysis.detected_condition %}
+                <div>
+                  <strong>{{ c.medical_analysis.detected_condition }}</strong><br>
+                  <span class="badge badge-high">{{ c.medical_analysis.severity }}</span><br>
+                  <small>Confidence: {{ (c.medical_analysis.confidence_score * 100)|int }}%</small>
+                </div>
+                {% else %}
+                <div>
+                  <span class="badge badge-medium">Non-Medical Image</span><br>
+                  <small>{{ c.medical_analysis.note }}</small>
+                </div>
+                {% endif %}
+              {% else %}
+              <span class="surface-body" style="font-size:0.8rem;">Not analyzed</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if c.risk_label == 'MALIGNANT' %}
+              <span class="badge badge-high">{{ c.risk_label }}</span>
+              {% else %}
+              <span class="badge badge-low">{{ c.risk_label }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if c.risk_score >= 0.8 %}
+              <span class="badge badge-high">Stage III-IV</span>
+              {% elif c.risk_score >= 0.5 %}
+              <span class="badge badge-medium">Stage I-II</span>
+              {% else %}
+              <span class="badge badge-low">Stage 0</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="symptom-score">{{ '%.3f'|format(c.risk_score) }}</div>
+              <div class="surface-body" style="font-size: 0.85rem;">
+                {% if c.risk_score >= 0.8 %}
+                <span class="badge badge-high">High Risk</span>
+                {% elif c.risk_score >= 0.5 %}
+                <span class="badge">Moderate</span>
+                {% else %}
+                <span class="badge badge-low">Low</span>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              <span class="badge {% if c.status == 'REVIEWED' %}badge-low{% else %}badge-high{% endif %}">
+                {{ c.status }}
+              </span>
+            </td>
+            <td>
+              {% if c.status != 'REVIEWED' %}
+              <form action="/oncologist/case/{{ c.case_id }}/review" method="post" style="display:inline;">
+                <button class="btn btn-secondary" type="submit" style="min-width: 120px; padding: 0.5rem 1rem; font-size: 0.85rem;">Mark Reviewed</button>
+              </form>
+              {% else %}
+              <span class="badge badge-low">Reviewed</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h3>No AI-flagged cases yet</h3>
+      <p>Ask a PCP to upload a scan from the PCP Triage portal.</p>
+      <div style="margin-top: 1.5rem;">
+        <a href="/pcp" class="btn">Go to PCP Portal</a>
+      </div>
+    </div>
+    {% endif %}
+  </section>
+
+  <section class="surface-panel fade-in-up">
+    <h2 class="surface-title">Workflow Guidance</h2>
+    <p class="surface-body">
+      As an oncologist, your role is to review AI-flagged cases and determine appropriate next steps for patient care.
+    </p>
+    
+    <div class="pillar-list">
+      <article class="pillar-card">
+        <div class="pillar-label">Review Process</div>
+        <h3 class="pillar-title">Case Evaluation</h3>
+        <p class="pillar-body">
+          1. Examine the uploaded mammogram<br>
+          2. Review the AI risk assessment<br>
+          3. Check medical analysis findings<br>
+          4. Consider simulated staging information<br>
+          5. Mark as "Reviewed" to acknowledge<br>
+          6. Assign to a nurse navigator for coordination
+        </p>
+      </article>
+      
+      <article class="pillar-card">
+        <div class="pillar-label">Risk Categories</div>
+        <h3 class="pillar-title">Assessment Levels</h3>
+        <p class="pillar-body">
+          <span class="badge badge-high">High Risk (≥0.8)</span> - Immediate attention required<br>
+          <span class="badge">Moderate Risk (0.5-0.79)</span> - Standard review process<br>
+          <span class="badge badge-low">Low Risk (≤0.49)</span> - Routine monitoring
+        </p>
+      </article>
+      
+      <article class="pillar-card">
+        <div class="pillar-label">Simulated Staging</div>
+        <h3 class="pillar-title">Stage Estimation</h3>
+        <p class="pillar-body">
+          <span class="badge badge-high">Stage III-IV (≥0.8)</span> - Advanced disease<br>
+          <span class="badge badge-medium">Stage I-II (0.5-0.79)</span> - Early-mid stage<br>
+          <span class="badge badge-low">Stage 0 (&lt;0.5)</span> - Non-invasive/early<br><br>
+          <em>Note: This is a simulated staging for demonstration purposes only.</em>
+        </p>
+      </article>
+    </div>
+    
+    <div class="alert-banner" style="margin-top: 2rem;">
+      <strong>Pro Tip:</strong> Use the "Clear Worklist" button at the end of your shift to reset the queue 
+      for the next clinician. All reviewed cases are preserved in the database.
+    </div>
+    
+    <div class="alert-banner urgent" style="margin-top: 1.5rem;">
+      <strong>Emergency Protocol:</strong> For patients reporting critical symptoms (score ≥4), 
+      contact them immediately via phone and arrange for urgent clinical evaluation.
+    </div>
+  </section>
+</div>
+
+<script>
+// Add loading animation to the Clear Worklist form
+document.querySelector('form[action="/oncologist/clear"]').addEventListener('submit', function() {
+  const btn = document.querySelector('button[type="submit"]');
+  if (btn) {
+    btn.classList.add('loading');
+  }
+});
+
+// Add loading animation to all Mark Reviewed forms
+document.querySelectorAll('form[action^="/oncologist/case/"]').forEach(form => {
+  form.addEventListener('submit', function() {
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.classList.add('loading');
+    }
+  });
+});
+</script>
+{% endblock %}

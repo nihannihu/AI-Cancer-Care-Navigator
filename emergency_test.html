@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency Button Test</title>
+</head>
+<body>
+    <h1>Emergency Button Test</h1>
+    <button id="emergency-button">🚨 Emergency</button>
+    
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('emergency-button').addEventListener('click', function () {
+            const button = this;
+            button.disabled = true;
+            button.textContent = 'Finding hospitals...';
+            
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Locating your position and finding the nearest hospital...</p>';
+            
+            // Check if geolocation is supported
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function (position) {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        
+                        // Send location to backend to find nearest hospitals
+                        fetch('/emergency-hospitals', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                latitude: lat,
+                                longitude: lon
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Received data:', data);
+                            if (data.features && data.features.length > 0) {
+                                let html = '<h2>Nearest Hospitals:</h2><ul>';
+                                data.features.forEach(feature => {
+                                    const props = feature.properties;
+                                    html += `<li><strong>${props.name}</strong> - ${props.distance_km} km away</li>`;
+                                });
+                                html += '</ul>';
+                                results.innerHTML = html;
+                            } else {
+                                results.innerHTML = '<p>No hospitals found nearby.</p>';
+                            }
+                            button.disabled = false;
+                            button.textContent = '🚨 Emergency';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            results.innerHTML = '<p>Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
+                            button.disabled = false;
+                            button.textContent = '🚨 Emergency';
+                        });
+                    },
+                    function (error) {
+                        // Fallback to backend without location
+                        fetch('/emergency-hospitals', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                latitude: null,
+                                longitude: null
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Received data:', data);
+                            if (data.features && data.features.length > 0) {
+                                let html = '<h2>Nearest Hospitals:</h2><ul>';
+                                data.features.forEach(feature => {
+                                    const props = feature.properties;
+                                    html += `<li><strong>${props.name}</strong> - ${props.distance_km} km away</li>`;
+                                });
+                                html += '</ul>';
+                                results.innerHTML = html;
+                            } else {
+                                results.innerHTML = '<p>No hospitals found nearby.</p>';
+                            }
+                            button.disabled = false;
+                            button.textContent = '🚨 Emergency';
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            results.innerHTML = '<p>Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
+                            button.disabled = false;
+                            button.textContent = '🚨 Emergency';
+                        });
+                    }
+                );
+            } else {
+                // Geolocation not supported
+                fetch('/emergency-hospitals', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        latitude: null,
+                        longitude: null
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Received data:', data);
+                    if (data.features && data.features.length > 0) {
+                        let html = '<h2>Nearest Hospitals:</h2><ul>';
+                        data.features.forEach(feature => {
+                            const props = feature.properties;
+                            html += `<li><strong>${props.name}</strong> - ${props.distance_km} km away</li>`;
+                        });
+                        html += '</ul>';
+                        results.innerHTML = html;
+                    } else {
+                        results.innerHTML = '<p>No hospitals found nearby.</p>';
+                    }
+                    button.disabled = false;
+                    button.textContent = '🚨 Emergency';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    results.innerHTML = '<p>Error finding hospitals. Please call 1-800-CANCER immediately.</p>';
+                    button.disabled = false;
+                    button.textContent = '🚨 Emergency';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
