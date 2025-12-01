@@ -2,7 +2,9 @@ import os
 import httpx
 
 # Use the new API key directly for testing
-GEMINI_API_KEY = "AIzaSyCKg3ur9DIN8oCMN02hZ06jA_GWb8CWbIQ"
+# GEMINI_API_KEY = "AIzaSyCKg3ur9DIN8oCMN02hZ06jA_GWb8CWbIQ"
+import os
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "AIzaSyCKg3ur9DIN8oCMN02hZ06jA_GWb8CWbIQ")
 print(f"New Gemini API Key: {GEMINI_API_KEY[:15] + '...' if GEMINI_API_KEY else 'None'}")
 
 # First, let's list available models
