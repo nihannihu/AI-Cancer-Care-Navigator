@@ -63,3 +63,8 @@ jpeg/
 
 # Node modules
 node_modules/
+
+# Debug output
+debug_output.txt
+*.key
+*.secret

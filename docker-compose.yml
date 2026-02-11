@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  python-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+    env_file:
+      - .env
+
+  node-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.node
+    ports:
+      - "3001:3001"
+    depends_on:
+      - python-backend
+    environment:
+      - PORT=3001
+      - AI_BACKEND_URL=http://python-backend:8000
+    env_file:
+      - .env

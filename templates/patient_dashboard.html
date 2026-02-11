@@ -876,6 +876,33 @@
                 </div>
             `;
 
+            // QR Code
+            try {
+                console.log('QR Code data:', data.qr_code);
+                const qrImg = document.getElementById('qr-code-img');
+                console.log('QR Img element:', qrImg);
+                
+                if (data.qr_code && qrImg) {
+                    qrImg.src = data.qr_code;
+                    qrImg.style.display = 'block';
+                    console.log('QR code displayed successfully');
+                } else {
+                    console.log('No QR code data received or QR image element not found');
+                    if (qrImg) {
+                        qrImg.style.display = 'none';
+                    }
+                    const qrContainer = document.querySelector('.qr-container');
+                    if (qrContainer) {
+                        // Only show message if no QR code data was provided
+                        if (!data.qr_code) {
+                            qrContainer.innerHTML = '<p style="color: #94a3b8;">QR code not available</p>';
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error handling QR code:', error);
+            }
+
         } catch (error) {
             console.error('Error loading dashboard:', error);
             document.getElementById('timeline-container').innerHTML = '<p style="color: #ef4444;">Error loading data.</p>';

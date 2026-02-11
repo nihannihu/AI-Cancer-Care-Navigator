@@ -1,0 +1,20 @@
+# Use Node.js version 16 as the base image (compatible with your package.json)
+FROM node:16-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install Node.js dependencies
+RUN npm ci --only=production
+
+# Copy the rest of the application
+COPY . .
+
+# Expose port 3001
+EXPOSE 3001
+
+# Command to run the application
+CMD ["node", "server.js"]

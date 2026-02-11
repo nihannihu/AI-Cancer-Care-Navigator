@@ -29,7 +29,12 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
 import google.generativeai as genai
 import os
 
+# Debug: Print environment variables
+print(f"DEBUG: GEMINI_API_KEY from env: {os.getenv('GEMINI_API_KEY', 'NOT_FOUND')}[:10]...")
+
 def analyze_report(pdf_bytes: bytes) -> Dict[str, Any]:
+    # Reload environment variables to ensure we have the latest API key
+    import os
     text = extract_text_from_pdf(pdf_bytes)
     
     # DEBUG: Write extracted text to file for inspection
@@ -44,6 +49,7 @@ def analyze_report(pdf_bytes: bytes) -> Dict[str, Any]:
         print("DEBUG: No text extracted from PDF. Attempting fallback to Gemini Vision API...")
         
         api_key = os.getenv("GEMINI_API_KEY")
+        print(f"DEBUG ANALYZE_REPORT: GEMINI_API_KEY from env: {api_key[:10] if api_key else 'NOT_FOUND'}")
         if not api_key:
              return {
                 "text_snippet": "No text extracted.",

@@ -5,6 +5,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from typing import List
 from pathlib import Path
 import os  # Add os import for environment variables
+
+# Debug: Print environment variables at startup
+print(f"DEBUG ROUTER: GEMINI_API_KEY from env: {os.getenv('GEMINI_API_KEY', 'NOT_FOUND')[:10] if os.getenv('GEMINI_API_KEY') else 'NOT_FOUND'}")
 from .auth import (
     verify_password, get_password_hash, create_access_token, 
     get_current_user, users_collection, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -290,6 +293,9 @@ async def upload_report(
         content = await file.read()
         buffer.write(content)
     
+    # Debug: Check environment variables before analysis
+    print(f"DEBUG UPLOAD: GEMINI_API_KEY from env: {os.getenv('GEMINI_API_KEY', 'NOT_FOUND')[:10] if os.getenv('GEMINI_API_KEY') else 'NOT_FOUND'}")
+    
     try:
         # Use the advanced NLP analysis
         from ml.nlp_utils import analyze_report
@@ -339,12 +345,30 @@ async def get_dashboard(current_user: dict = Depends(get_current_user)):
     patient_username = current_user.get("username")
     patient_id = current_user.get("patient_id")
     
-    print(f"Dashboard request for user: {patient_username}, email: {patient_email}")
+    # Fallback for older users who might not have patient_id set
+    if not patient_id and patient_username:
+        patient_id = f"pat_{patient_username}"
+        # Update user record with the generated patient_id
+        try:
+            await users_collection.update_one(
+                {"_id": current_user["_id"]}, 
+                {"$set": {"patient_id": patient_id}}
+            )
+            print(f"Updated user with generated patient_id: {patient_id}")
+        except Exception as e:
+            print(f"Failed to update user with patient_id: {e}")
+    
+    print(f"Dashboard request for user: {patient_username}, email: {patient_email}, patient_id: {patient_id}")
+    print(f"Current user data: {current_user}")
+    print(f"DEBUG: patient_id type: {type(patient_id)}, patient_id value: '{patient_id}'")
     
     # Use the global db variable set from app_main.py
+    print(f"DEBUG: Database connection status - db is None: {db is None}")
     if db is None:
         print("Database not configured")
         return {"error": "Database not configured"}
+    else:
+        print("DEBUG: Database connection is available")
     
     # Get database collections
     try:
@@ -453,10 +477,22 @@ async def get_dashboard(current_user: dict = Depends(get_current_user)):
     try:
         # Use configurable app URL for QR code - fix the URL generation
         app_url = os.getenv("APP_URL", "http://localhost:8000")  # Changed to 8000 for backend
-        qr_data = f"{app_url}/patient/profile/{patient_id}"
-        qr_image = QRCodeGenerator.generate_qr(qr_data)
+        print(f"DEBUG QR: app_url={app_url}, patient_id={patient_id}")
+        
+        # Check if we have valid data for QR code
+        # Ensure patient_id is not None or empty
+        if not app_url or not patient_id or patient_id.strip() == "":
+            print(f"DEBUG QR: Missing required data - app_url: {app_url}, patient_id: '{patient_id}'")
+            qr_image = None
+        else:
+            qr_data = f"{app_url}/patient/profile/{patient_id}"
+            print(f"DEBUG QR: qr_data={qr_data}")
+            qr_image = QRCodeGenerator.generate_qr(qr_data)
+            print(f"DEBUG QR: qr_image generated successfully, length: {len(qr_image) if qr_image else 0}")
     except Exception as e:
         print(f"Error generating QR code: {e}")
+        import traceback
+        traceback.print_exc()
         qr_image = None
     
     return {

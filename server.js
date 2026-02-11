@@ -17,7 +17,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const path = require('path');
 
 // Load environment variables
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const AI_BACKEND_URL = process.env.AI_BACKEND_URL || 'http://localhost:8000';
 
 const app = express();

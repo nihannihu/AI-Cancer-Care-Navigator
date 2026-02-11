@@ -150,6 +150,28 @@ class EmailService:
             patient_data: Dictionary containing patient information
             appointment_details: Dictionary containing appointment details
             
+        Returns:
+            str: Formatted email body with patient and appointment details
         """
         from datetime import datetime
-        return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Create email body with patient and appointment details
+        body = f"""
+New Appointment Booking Confirmation
+=================================
+
+Patient Information:
+------------------
+Name: {patient_data.get('username', 'N/A')}
+Email: {patient_data.get('email', 'N/A')}
+
+Appointment Details:
+-------------------
+Doctor: {appointment_details.get('doctor_name', 'N/A')}
+Preferred Time: {appointment_details.get('preferred_time', 'N/A')}
+Booking Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+Please contact the patient to confirm this appointment.
+        """.strip()
+        
+        return body

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Dataset Information - Onco-Navigator AI{% endblock %}
+{% block content %}
+<div class="page-grid">
+  <section class="surface-panel fade-in-up">
+    <h1 class="surface-title">Dataset Information</h1>
+    <p class="surface-body">
+      Overview of all datasets used in the Onco-Navigator AI platform for cancer detection and diagnosis.
+    </p>
+
+    <div class="dataset-info-grid">
+      <!-- CBIS-DDSM Dataset -->
+      <div class="dataset-card">
+        <h2 class="section-title">CBIS-DDSM Dataset</h2>
+        <p class="dataset-description">
+          The Curated Breast Imaging Subset of DDSM (CBIS-DDSM) is the primary dataset used for training our breast cancer detection model.
+        </p>
+        <div class="dataset-details">
+          <h3>Key Statistics:</h3>
+          <ul>
+            <li><strong>Images:</strong> Over 2,000 mammography images</li>
+            <li><strong>Annotations:</strong> Lesion segmentation masks and bounding boxes</li>
+            <li><strong>Labels:</strong> Benign vs. Malignant classifications</li>
+            <li><strong>Usage:</strong> Primary model training for AI diagnostics</li>
+          </ul>
+        </div>
+        <div class="dataset-source">
+          <h3>Source:</h3>
+          <p>National Cancer Institute</p>
+        </div>
+      </div>
+
+      <!-- Calcification Dataset -->
+      <div class="dataset-card">
+        <h2 class="section-title">Breast Calcification Dataset</h2>
+        <p class="dataset-description">
+          Detailed dataset focusing on calcifications in mammograms, which are important indicators for breast cancer diagnosis.
+        </p>
+        <div class="dataset-details">
+          <h3>Key Features:</h3>
+          <ul>
+            <li><strong>Type:</strong> Calcification abnormalities</li>
+            <li><strong>Characteristics:</strong> Shape, distribution, and subtlety ratings</li>
+            <li><strong>Assessment:</strong> BI-RADS assessment categories</li>
+            <li><strong>Pathology:</strong> Benign, malignant, and benign without callback</li>
+          </ul>
+        </div>
+        <div class="dataset-source">
+          <h3>Source:</h3>
+          <p>CBIS-DDSM calcification case descriptions</p>
+        </div>
+      </div>
+
+      <!-- Mass Dataset -->
+      <div class="dataset-card">
+        <h2 class="section-title">Breast Mass Dataset</h2>
+        <p class="dataset-description">
+          Comprehensive dataset of mass abnormalities in mammograms with detailed morphological characteristics.
+        </p>
+        <div class="dataset-details">
+          <h3>Key Features:</h3>
+          <ul>
+            <li><strong>Type:</strong> Mass abnormalities</li>
+            <li><strong>Shape:</strong> Round, oval, lobular, irregular, architectural distortion</li>
+            <li><strong>Margins:</strong> Circumscribed, microlobulated, obscured, ill-defined, spiculated</li>
+            <li><strong>Assessment:</strong> BI-RADS assessment categories</li>
+            <li><strong>Pathology:</strong> Benign, malignant, and benign without callback</li>
+          </ul>
+        </div>
+        <div class="dataset-source">
+          <h3>Source:</h3>
+          <p>CBIS-DDSM mass case descriptions</p>
+        </div>
+      </div>
+
+      <!-- MIMIC-III Dataset -->
+      <div class="dataset-card">
+        <h2 class="section-title">MIMIC-III Clinical Dataset</h2>
+        <p class="dataset-description">
+          De-identified critical care database containing clinical data for predictive modeling and outcome analysis.
+        </p>
+        <div class="dataset-details">
+          <h3>Key Features:</h3>
+          <ul>
+            <li><strong>Data Types:</strong> Patient demographics, vital signs, laboratory tests, medications</li>
+            <li><strong>Coverage:</strong> 40,000+ patients and 60,000+ ICU stays</li>
+            <li><strong>Usage:</strong> Predictive models for treatment outcomes and side effects</li>
+          </ul>
+        </div>
+        <div class="dataset-source">
+          <h3>Source:</h3>
+          <p>MIT Laboratory for Computational Physiology</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert-banner" style="margin-top: 2rem;">
+      <strong>Note:</strong> All datasets are used in accordance with their respective licenses and ethical guidelines. 
+      Patient privacy is protected through de-identification processes.
+    </div>
+  </section>
+</div>
+
+<style>
+.dataset-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.dataset-card {
+  background: rgba(30, 41, 59, 0.8);
+  border-radius: var(--medical-radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--medical-shadow);
+  border: 1px solid var(--medical-border);
+}
+
+.dataset-card h2 {
+  color: var(--medical-text-primary);
+  margin-top: 0;
+  border-bottom: 1px solid var(--medical-border);
+  padding-bottom: 0.5rem;
+}
+
+.dataset-description {
+  color: var(--medical-text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.dataset-details h3,
+.dataset-source h3 {
+  color: var(--medical-text-primary);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.dataset-details ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.dataset-details li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+  color: var(--medical-text-secondary);
+}
+
+.dataset-source p {
+  color: var(--medical-text-secondary);
+  font-style: italic;
+}
+</style>
+{% endblock %}

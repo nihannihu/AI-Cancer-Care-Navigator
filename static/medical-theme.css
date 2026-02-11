@@ -631,6 +631,22 @@ input[type="range"] {
   transform: translateY(-2px);
 }
 
+/* Ambulance Button */
+.ambulance-button {
+  background: linear-gradient(135deg, var(--medical-danger), #dc2626);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  font-weight: 600;
+  animation: pulse 2s infinite;
+}
+
+.ambulance-button:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  transform: translateY(-2px);
+}
+
 /* Emergency Modal */
 .emergency-modal {
   display: none;
@@ -909,15 +925,74 @@ input[type="range"] {
 }
 
 .result-box {
-  background: rgba(30, 41, 59, 0.8);
+  background: rgba(30, 41, 59, 0.95) !important; /* Use project theme background */
   border-radius: var(--medical-radius-md);
   padding: 1.5rem;
-  border: 1px solid var(--medical-border);
+  border: 1px solid var(--medical-border-strong) !important; /* Use project theme border */
   margin-top: 1rem;
+  box-shadow: var(--medical-shadow) !important; /* Use project theme shadow */
+  color: var(--medical-text-primary) !important; /* Use project theme text color */
+  position: relative;
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--medical-font);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.result-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--medical-primary), var(--medical-secondary)) !important; /* Use project theme gradient */
+  border-radius: var(--medical-radius-md) var(--medical-radius-md) 0 0;
 }
 
 .result-box.hidden {
-  display: none;
+  display: none !important;
+}
+
+/* Debug: Add a visible border to all result boxes for testing */
+.result-box.debug-border {
+  border: 3px dashed #ef4444 !important; /* Red dashed border for debugging */
+}
+
+.result-box:not(.hidden) {
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.result-box:not(.hidden):first-child {
+  animation: fadeIn 0.3s ease-in, pulseResult 2s infinite;
+}
+
+.result-box h3 {
+  color: var(--medical-text-primary) !important; /* Use project theme text color */
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  border-bottom: 1px solid var(--medical-border);
+  padding-bottom: 0.75rem;
+  font-weight: 700;
+  background: rgba(30, 41, 59, 0.5);
+  padding: 0.5rem;
+  border-radius: var(--medical-radius-sm);
+}
+
+.result-box p {
+  color: var(--medical-text-secondary) !important; /* Use project theme text color */
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
+  font-size: 1.1rem;
+  background: rgba(15, 23, 42, 0.3);
+  padding: 0.75rem;
+  border-radius: var(--medical-radius-sm);
 }
 
 .metric-card {
@@ -927,6 +1002,7 @@ input[type="range"] {
   border: 1px solid var(--medical-border);
   text-align: center;
   margin-bottom: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .metric-value {
@@ -939,6 +1015,7 @@ input[type="range"] {
 .metric-label {
   font-size: 0.9rem;
   color: var(--medical-text-secondary);
+  font-weight: 500;
 }
 
 .result-table {
@@ -1035,6 +1112,22 @@ input[type="range"] {
   100% {
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
   }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseResult {
+  0% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+  50% { box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
+  100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .fade-in-up {

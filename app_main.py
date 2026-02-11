@@ -5,12 +5,17 @@ from typing import List, Optional
 import os
 from datetime import datetime
 
+# Load configuration from .env and .env.python if present
+from dotenv import load_dotenv
+ROOT = Path(__file__).resolve().parent
+load_dotenv(ROOT / ".env")
+load_dotenv(ROOT / ".env.python", override=True)
+
 from fastapi import FastAPI, File, Form, Request, UploadFile
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from dotenv import load_dotenv
 import httpx
 
 from ml.model_utils import BreastCancerModel
@@ -23,13 +28,13 @@ TEMPLATES_DIR = ROOT / "templates"
 STATIC_DIR = ROOT / "static"
 UPLOADS_DIR = STATIC_DIR / "uploads"
 
-# Load configuration from .env and .env.python if present
-load_dotenv(ROOT / ".env")
-load_dotenv(ROOT / ".env.python", override=True)
-
-# Geoapify API key
+# API Keys
 GEOAPIFY_API_KEY = os.getenv("GEOAPIFY_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+APP_URL = os.getenv("APP_URL")
 print(f"DEBUG: GEOAPIFY_API_KEY loaded at startup: {GEOAPIFY_API_KEY[:10] if GEOAPIFY_API_KEY else None}")
+print(f"DEBUG: GEMINI_API_KEY loaded at startup: {GEMINI_API_KEY[:10] if GEMINI_API_KEY else None}")
+print(f"DEBUG: APP_URL loaded at startup: {APP_URL}")
 
 # Optional MongoDB client (mirrors data for persistence; app still works without it)
 MONGODB_URI = os.getenv("MONGODB_URI")
@@ -305,12 +310,6 @@ async def submit_symptoms(
 async def ai_diagnostics_page(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("ai_diagnostics.html", {"request": request})
 
-@app.post("/api/predict")
-async def api_predict(file: UploadFile = File(...)) -> JSONResponse:
-    data = await file.read()
-    label, score = model.predict_label(data)
-    return JSONResponse({"label": label, "risk_score": score})
-
 
 # -------------------- Emergency Hospital Finder -----------------------------
 
@@ -512,7 +511,7 @@ def get_mock_hospitals_near_location(user_lat, user_lon):
 
 
 # AI Diagnostics API Endpoints
-from ml.image_analysis import analyze_image
+from ml.image_analysis import analyze_image, analyze_breast_image
 from ml.nlp_utils import analyze_report
 from ml.predictive_models import predict_survival, predict_side_effects
 import json
@@ -522,6 +521,15 @@ async def api_analyze_image(file: UploadFile = File(...)) -> JSONResponse:
     try:
         data = await file.read()
         result = analyze_image(data)
+        return JSONResponse(result)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+@app.post("/api/analyze-breast-image")
+async def api_analyze_breast_image(file: UploadFile = File(...)) -> JSONResponse:
+    try:
+        data = await file.read()
+        result = analyze_breast_image(data)
         return JSONResponse(result)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -704,6 +712,11 @@ Destination: {hospital_name} (ETA: {eta})
 @app.get("/ambulance/tracking", response_class=HTMLResponse)
 async def ambulance_tracking(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("ambulance_tracking.html", {"request": request})
+
+
+@app.get("/datasets", response_class=HTMLResponse)
+async def dataset_info(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse("dataset_info.html", {"request": request})
 
 
 # To run: uvicorn app_main:app --reload
