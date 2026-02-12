@@ -21,12 +21,13 @@ class GeminiIntent:
     
     def __init__(self):
         """Initialize Gemini API client"""
-        api_key = os.getenv("GEMINI_API_KEY")
-        if api_key:
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-2.5-flash')
-        else:
-            self.model = None
+        try:
+            from ml.gemini_utils import get_gemini_client
+            self.client = get_gemini_client()
+            # We don't store self.model anymore, we use self.client
+        except Exception as e:
+            print(f"Failed to initialize GeminiClient: {e}")
+            self.client = None
     
     async def extract_intent(self, message: str) -> Dict[str, Any]:
         """
@@ -39,7 +40,7 @@ class GeminiIntent:
             Dictionary containing intent and response message
         """
         # If Gemini is not configured, use keyword-based fallback
-        if not self.model:
+        if not self.client:
             return self._extract_intent_fallback(message)
         
         # Define the prompt for intent extraction
@@ -67,8 +68,8 @@ class GeminiIntent:
         """
         
         try:
-            # Generate response from Gemini
-            response = await self.model.generate_content_async(prompt)
+            # Generate response from Gemini using robust client
+            response = await self.client.generate_content_async(prompt)
             result = eval(response.text.strip())  # Convert string response to dict
             return result
         except Exception as e:

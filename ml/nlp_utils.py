@@ -48,24 +48,9 @@ def analyze_report(pdf_bytes: bytes) -> Dict[str, Any]:
     if not text or not text.strip():
         print("DEBUG: No text extracted from PDF. Attempting fallback to Gemini Vision API...")
         
-        api_key = os.getenv("GEMINI_API_KEY")
-        print(f"DEBUG ANALYZE_REPORT: GEMINI_API_KEY from env: {api_key[:10] if api_key else 'NOT_FOUND'}")
-        if not api_key:
-             return {
-                "text_snippet": "No text extracted.",
-                "sentiment": {"compound": 0.0, "pos": 0.0, "neu": 1.0, "neg": 0.0},
-                "extracted_entities": {
-                    "diagnosis": ["Error: Scanned PDF detected but GEMINI_API_KEY not found."],
-                    "stage": [], "grade": [], "tumor_size": [],
-                    "biomarkers": [], "alerts": [], "risk_level": ["Unknown"]
-                },
-                "summary": "Could not read text from PDF. Please configure GEMINI_API_KEY to enable OCR for scanned documents."
-            }
-            
         try:
-            genai.configure(api_key=api_key)
-            # User has access to gemini-pro-latest
-            model = genai.GenerativeModel('models/gemini-pro-latest')
+            from ml.gemini_utils import GeminiClient
+            client = GeminiClient()
             
             prompt = """
             Analyze this pathology report and extract the following information in JSON format:
@@ -89,7 +74,9 @@ def analyze_report(pdf_bytes: bytes) -> Dict[str, Any]:
             """
             
             # Gemini supports PDF via parts
-            response = model.generate_content([
+            # Note: We need to pass the PDF bytes correctly.
+            # Using standard generation format for multimodal input
+            response = client.generate_content([
                 {'mime_type': 'application/pdf', 'data': pdf_bytes},
                 prompt
             ])
