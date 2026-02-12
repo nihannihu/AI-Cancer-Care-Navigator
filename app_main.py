@@ -617,6 +617,10 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
                 "details": str(e)
             }, status_code=503)
 
+    except Exception as e:
+        print(f"Error in analyze-symptoms: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 # -------------------- Smart Ambulance Booking -------------------------------
