@@ -67,4 +67,11 @@ node_modules/
 # Debug output
 debug_output.txt
 *.key
-*.secret
+
+# Datasets
+dataset/
+Dataset_BUSI_with_GT/
+
+# Large Model Files (handled by LFS if installed, otherwise ignored)
+# *.h5 
+

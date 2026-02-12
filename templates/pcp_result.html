@@ -33,9 +33,16 @@
 
         {% if image_url %}
         <div class="image-preview">
-            <h3>Uploaded Image</h3>
+            <h3>Uploaded Image & Analysis</h3>
             <div class="case-image-container">
                 <img src="{{ image_url }}" alt="Uploaded mammogram" class="case-image-preview">
+                {% if segmentation_overlay %}
+                <div class="segmentation-overlay-container">
+                    <h4>AI Segmentation Mask</h4>
+                    <img src="{{ segmentation_overlay }}" alt="Segmentation Mask" class="case-image-preview">
+                    <p class="caption">Green overlay indicates suspected lesion areas identified by the Attention U-Net model.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
         {% endif %}

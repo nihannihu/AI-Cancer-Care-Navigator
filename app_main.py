@@ -19,6 +19,8 @@ from fastapi.templating import Jinja2Templates
 import httpx
 
 from ml.model_utils import BreastCancerModel
+from ml.segmentation_utils import get_segmentor
+from ml.segmentation_utils import get_segmentor
 
 # Import patient app router
 from patient_app.router import patient_app_router, set_db
@@ -62,6 +64,7 @@ templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 _model_path_env = os.getenv("MODEL_PATH")
 try:
     model = BreastCancerModel(Path(_model_path_env)) if _model_path_env else BreastCancerModel()
+    segmentor = get_segmentor() # Initialize segmentation model (will try to load h5)
     print("✅ Breast cancer model loaded successfully")
 except Exception as e:
     print(f"⚠️ Warning: Could not load breast cancer model: {e}")
@@ -134,6 +137,9 @@ async def pcp_upload(
     case_id = len(SCAN_CASES) + 1
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # Run segmentation
+    segmentation_overlay, seg_error = segmentor.predict_mask(data)
+
     # Persist uploaded image so it can be previewed in the UI
     uploads_dir = UPLOADS_DIR
     uploads_dir.mkdir(parents=True, exist_ok=True)
@@ -186,9 +192,10 @@ async def pcp_upload(
             "risk_label": label,
             "risk_score": score,
             "case_id": case_id,
-            "image_url": image_url,
             "timestamp": timestamp,
-            "cancer_stage": stage  # Add cancer stage to the response
+            "image_url": image_url,
+            "cancer_stage": stage,
+            "segmentation_overlay": segmentation_overlay, # Pass to template
         },
     )
 
@@ -516,6 +523,22 @@ from ml.nlp_utils import analyze_report
 from ml.predictive_models import predict_survival, predict_side_effects
 import json
 
+@app.post("/api/segment-image")
+async def api_segment_image(file: UploadFile = File(...)):
+    try:
+        contents = await file.read()
+        overlay_url, error = segmentor.predict_mask(contents)
+        
+        if error:
+             return JSONResponse({"error": error}, status_code=500)
+             
+        return JSONResponse({
+            "segmentation_overlay": overlay_url,
+            "status": "success"
+        })
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 @app.post("/api/analyze-image")
 async def api_analyze_image(file: UploadFile = File(...)) -> JSONResponse:
     try:
@@ -530,6 +553,12 @@ async def api_analyze_breast_image(file: UploadFile = File(...)) -> JSONResponse
     try:
         data = await file.read()
         result = analyze_breast_image(data)
+        
+        # Add segmentation
+        segmentation_overlay, seg_error = segmentor.predict_mask(data)
+        if segmentation_overlay:
+            result["segmentation_overlay"] = segmentation_overlay
+            
         return JSONResponse(result)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -725,4 +754,4 @@ if __name__ == "__main__":
 
     host = os.getenv("APP_HOST", "0.0.0.0")
     port = int(os.getenv("APP_PORT", "8000"))
-    uvicorn.run("app_main:app", host=host, port=port, reload=True)
+    uvicorn.run("app_main:app", host=host, port=port, reload=False)
