@@ -1,3 +1,13 @@
+---
+title: Onco Navigator AI
+emoji: 🩺
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # Onco-Navigator AI - Bridging India's Cancer Care Gap
 
 An AI-powered cancer care platform that streamlines early detection and specialist referral through three core pillars:

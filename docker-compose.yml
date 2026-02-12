@@ -6,12 +6,12 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "7860:7860"
     volumes:
       - .:/app
     environment:
       - APP_HOST=0.0.0.0
-      - APP_PORT=8000
+      - APP_PORT=7860
     env_file:
       - .env
     # deploy:

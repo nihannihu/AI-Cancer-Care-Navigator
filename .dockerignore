@@ -1,34 +1,17 @@
-# Ignore version control directories
-.git
+# Datasets
+dataset/
+Dataset_BUSI_with_GT/
+
+# Git
+.git/
 .gitignore
 
-# Ignore Python cache and compiled files
-__pycache__
+# Env
+.env
+
+# Python
+__pycache__/
 *.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-.coverage
-.pytest_cache
 
-# Ignore Node.js modules (will be installed during build)
-node_modules
-
-# Ignore log files
-*.log
-
-# Ignore OS generated files
-Thumbs.db
-.DS_Store
-desktop.ini
-
-# Ignore IDE files
-.vscode
-.idea
-*.swp
-*.swo
-
-# Ignore test files (optional - remove if you want to run tests in container)
-test_*
-*_test.py
+# Node
+node_modules/
