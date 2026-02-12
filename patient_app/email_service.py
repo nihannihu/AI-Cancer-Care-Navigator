@@ -34,6 +34,7 @@ class EmailService:
         # DEBUG PRINT
         print(f"STDOUT DEBUG: EmailService Init - SMTP_USER={self.smtp_user}")
         
+        # Check for SMTP credentials
         if self.smtp_user and self.smtp_pass:
             self.method = "smtp"
             self.enabled = True
@@ -41,10 +42,11 @@ class EmailService:
             self.smtp_port = int(os.getenv("SMTP_PORT", "587"))
             self.smtp_from = os.getenv("SMTP_FROM", self.smtp_user)
             self.admin_email = os.getenv("ADMIN_EMAIL", "admin@example.com")
-            logger.info("Using SMTP for email notifications")
+            logger.info(f"EmailService: Configured with SMTP user: {self.smtp_user}")
             return
             
-        logger.info("No email service configured. Email notifications will be disabled.")
+        logger.warning("EmailService: No email credentials found (SMTP_USER/PASS missing). Email features disabled.")
+        logger.warning("To fix: Set SMTP_USER and SMTP_PASS in environment variables.")
     
     def send_appointment_confirmation(self, patient_data: Dict[str, Any], appointment_details: Dict[str, Any]) -> bool:
         """

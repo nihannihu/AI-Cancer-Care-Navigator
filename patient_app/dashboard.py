@@ -58,7 +58,8 @@ class TimelineAggregator:
 
 class AIInsights:
     def __init__(self):
-        self.model = genai.GenerativeModel('gemini-pro')
+        # We will use the GeminiClient for robust handling
+        pass
 
     async def generate_insights(self, timeline_data: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -77,10 +78,18 @@ class AIInsights:
         """
         
         try:
-            response = self.model.generate_content(prompt)
+            from ml.gemini_utils import get_gemini_client
+            client = get_gemini_client()
+            response = await client.generate_content_async(prompt)
             text = response.text.strip()
+            
+            # Clean up potential markdown formatting
             if text.startswith("```json"):
-                text = text[7:-3]
+                text = text[7:]
+            if text.endswith("```"):
+                text = text[:-3]
+            text = text.strip()
+                
             return json.loads(text)
         except Exception as e:
             logger.error(f"Gemini Insight Error: {e}")
