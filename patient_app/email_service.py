@@ -121,6 +121,8 @@ class EmailService:
             from email.mime.text import MIMEText
             from email.mime.multipart import MIMEMultipart
             
+            logger.info(f"Attempting to send SMTP email to {self.admin_email} via {self.smtp_host}:{self.smtp_port}")
+            
             # Create email message
             msg = MIMEMultipart()
             msg['From'] = self.smtp_from
@@ -133,6 +135,7 @@ class EmailService:
             
             # Send email
             with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                server.set_debuglevel(1)  # Enable debug output for SMTP
                 server.starttls()
                 server.login(self.smtp_user, self.smtp_pass)
                 server.sendmail(self.smtp_from, self.admin_email, msg.as_string())
@@ -142,6 +145,8 @@ class EmailService:
             
         except Exception as e:
             logger.error(f"SMTP email error: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return False
     
     def _create_plain_text_body(self, patient_data: Dict[str, Any], appointment_details: Dict[str, Any]) -> str:
