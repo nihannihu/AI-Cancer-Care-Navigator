@@ -9,7 +9,8 @@ from .config import MONGODB_URI, SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINU
 import os
 import urllib.parse
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Switch to pbkdf2_sha256 to avoid bcrypt's 72-byte limit and dependency issues
+pwd_context = CryptContext(schemes=["pbkdf2_sha256", "bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="patient/login")
 
 # Parse the database name from the URI
