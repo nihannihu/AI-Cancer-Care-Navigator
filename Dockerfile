@@ -24,6 +24,12 @@ COPY . .
 # Expose port 7860 for Hugging Face Spaces
 EXPOSE 7860
 ENV APP_PORT=7860
+ENV PYTHONUNBUFFERED=1
+
+# Fix permissions for Hugging Face (which runs as non-root user 1000)
+# Create necessary directories and make everything writable
+RUN mkdir -p /app/static/uploads && \
+    chmod -R 777 /app
 
 # Command to run the application
 CMD ["python", "app_main.py"]
