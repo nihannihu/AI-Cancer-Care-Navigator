@@ -599,58 +599,23 @@ async def api_analyze_symptoms(request: Request) -> JSONResponse:
             return JSONResponse({"error": "No text provided"}, status_code=400)
         
         # Use Gemini API instead of OpenAI
-        GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-        print(f"DEBUG: GEMINI_API_KEY loaded: {GEMINI_API_KEY[:10] if GEMINI_API_KEY else None}")  # Debug output
-        if not GEMINI_API_KEY:
-            return JSONResponse({"error": "Gemini API key not configured"}, status_code=500)
-        
-        # Use gemini-pro-latest model which should be more widely available
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-latest:generateContent?key={GEMINI_API_KEY}"
-        payload = {
-            "contents": [{
-                "parts": [{
-                    "text": f"You are a medical assistant. Analyze the following symptoms and provide helpful medical insights: {text}"
-                }]
-            }]
-        }
-        headers = {
-            "Content-Type": "application/json"
-        }
-        
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, headers=headers, timeout=30.0)
-        
-        if response.status_code != 200:
-            error_text = response.text
-            return JSONResponse({
-                "error": f"Gemini API Error ({response.status_code}): {error_text}",
-                "status_code": response.status_code
-            }, status_code=response.status_code)
-        
+        # Use GeminiClient with fallback mechanism
         try:
-            data = response.json()
-            if "candidates" in data and len(data["candidates"]) > 0 and "content" in data["candidates"][0] and "parts" in data["candidates"][0]["content"] and len(data["candidates"][0]["content"]["parts"]) > 0:
-                analysis = data["candidates"][0]["content"]["parts"][0]["text"]
-                return JSONResponse({"analysis": analysis})
-            else:
-                return JSONResponse({
-                    "error": "Unexpected response format from Gemini API",
-                    "response": data
-                }, status_code=500)
-        except Exception as json_error:
-            return JSONResponse({
-                "error": f"Failed to parse Gemini API response: {str(json_error)}",
-                "raw_response": response.text[:500]
-            }, status_code=500)
+            from ml.gemini_utils import get_gemini_client
+            client = get_gemini_client()
             
-    except Exception as e:
-        print(f"Unexpected error in symptom analysis: {e}")
-        import traceback
-        traceback.print_exc()
-        return JSONResponse({
-            "error": f"Unexpected error: {str(e)}",
-            "type": type(e).__name__
-        }, status_code=500)
+            prompt = f"You are a compassionate medical assistant. Analyze the following patient symptoms and provide helpful medical insights, potential causes, and recommendations. Be clear but do not provide a definitive diagnosis. Symptoms: {text}"
+            
+            # Use async generation
+            response = await client.generate_content_async(prompt)
+            return JSONResponse({"analysis": response.text})
+            
+        except Exception as e:
+            print(f"Gemini analysis failed: {e}")
+            return JSONResponse({
+                "error": f"AI Analysis Unavailable: {str(e)}. Please try again later.",
+                "details": str(e)
+            }, status_code=503)
 
 
 
