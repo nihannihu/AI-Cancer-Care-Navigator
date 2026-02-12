@@ -83,10 +83,18 @@ async def register(username: str = Form(...), password: str = Form(...), email: 
         if existing_user:
             raise HTTPException(status_code=400, detail="Username already registered")
         
-        # Manually truncate password to 72 bytes for bcrypt
-        password_bytes = password.encode('utf-8')
-        if len(password_bytes) > 72:
-            password = password_bytes[:72].decode('utf-8', errors='ignore')
+        # Manually truncate password to 72 bytes for bcrypt compatibility
+        # Bcrypt has a limit of 72 bytes. We strip to 71 to be safe.
+        # We must decode back to string because passlib expects a string, 
+        # but the truncation must happen on the byte level.
+        try:
+            password_bytes = password.encode('utf-8')
+            if len(password_bytes) > 71:
+                password = password_bytes[:71].decode('utf-8', errors='ignore')
+        except Exception as e:
+            print(f"Password processing error: {e}")
+            # Fallback for weird edge cases
+            password = password[:71]
         
         hashed_password = get_password_hash(password)
         user_dict = {
