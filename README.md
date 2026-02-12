@@ -4,155 +4,103 @@ emoji: 🩺
 colorFrom: blue
 colorTo: green
 sdk: docker
-pinned: false
+pinned: true
 app_port: 7860
 ---
 
-# Onco-Navigator AI - Bridging India's Cancer Care Gap
+# 🩺 Onco-Navigator AI: Bridging the Cancer Care Gap
 
-An AI-powered cancer care platform that streamlines early detection and specialist referral through three core pillars:
-1. AI-Assisted Triage for Primary Care  
-2. Tele-Oncology Hub for Specialists
-3. Patient Monitoring & Symptom Tracking
+**An Advanced AI-Powered Platform for Early Detection, Specialist Referral, and Patient Support.**
 
-## Features
+> *Accurate Triage. Instant Specialist Access. Compassionate Care.*
 
-- **AI-Powered Mammography Analysis**: CNN model for breast cancer detection
-- **Geolocation-Based Emergency Services**: Find nearest hospitals with real-time location
-- **Patient Symptom Monitoring**: Daily check-in system for ongoing care
-- **Tele-Oncology Workflow**: Streamlined communication between PCPs and oncologists
-- **Responsive Web Interface**: Professional medical UI with mobile support
+![Banner](https://img.shields.io/badge/Status-Live-green) ![License](https://img.shields.io/badge/License-MIT-blue) ![Python](https://img.shields.io/badge/Python-3.9%2B-blue) ![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688) ![AI](https://img.shields.io/badge/AI-Gemini%20%26%20TensorFlow-orange)
 
-## Technology Stack
+## 📖 Overview
 
-- **Backend**: Python, FastAPI
-- **AI/ML**: TensorFlow, Keras
-- **Database**: MongoDB (optional)
-- **Frontend**: HTML, CSS, JavaScript with Jinja2 templating
-- **APIs**: Geoapify for geolocation services
-- **Deployment**: Uvicorn server
+**Onco-Navigator AI** is a comprehensive digital health solution designed to address critical gaps in oncology care, particularly in resource-constrained settings. By leveraging state-of-the-art **Artificial Intelligence** and **Telemedicine**, it creates a seamless ecosystem connecting Primary Care Physicians (PCPs), Oncologists, and Patients.
 
-## Prerequisites
+The platform streamlines the journey from initial suspicion to treatment and ongoing management, ensuring no patient is lost to follow-up.
 
-- Python 3.8+
-- pip (Python package manager)
-- MongoDB account (optional, for data persistence)
+## 🚀 Key Features
 
-## Installation
+### 1. 🤖 AI-Assisted Triage (For PCPs)
+-   **Deep Learning Analysis:** Utilizes `MobileNetV2` / Custom CNNs to analyze mammography and histology images for immediate risk assessment.
+-   **Risk Scoring:** Provides a confidence-based risk score (Low, Medium, High) to prioritize urgent cases.
+-   **Automated Referrals:** Instantly flags high-risk cases for oncologist review.
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd cancer-mega-project
-   ```
+### 2. 🏥 Tele-Oncology Hub (For Specialists)
+-   **Unified Workflow:** A centralized dashboard for oncologists to review prioritized cases, images, and patient history.
+-   **AI-Enhanced Medical Timeline:** Automatically aggregates patient history into a chronological timeline for rapid decision-making.
+-   **Secure Communication:** Direct communication channels for treatment planning.
 
-2. Create a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+### 3. ❤️ Patient Compassion Portal
+-   **AI Health Assistant:** A 24/7 empathetic chatbot powered by **Google Gemini Pro** to answer medical queries, explain reports, and provide emotional support.
+-   **Lab Report Analysis:** Uses OCR and NLP to extract key metrics (WBC, Hemoglobin, etc.) from uploaded PDF lab reports and explain them in plain language.
+-   **Medicine Adherence:** Tracks medication schedules (Chemo/Hormonal therapy) with reminders.
+-   **Voice Symptom Log:** Allows patients to record symptoms via voice, which AI transcribes and adds to their clinical record.
+-   **QR Code Profile:** Generates a secure QR code for instant sharing of medical history with emergency responders or new doctors.
+-   **Emergency Locator:** Real-time geolocation to find the nearest cancer care centers and hospitals.
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+## 🛠️ Technology Stack
 
-4. Set up environment variables:
-   - Copy `.env.example` to `.env`:
-     ```bash
-     cp .env.example .env
-     ```
-   - Edit `.env` and add your configuration:
-     ```
-     GEOAPIFY_API_KEY=your_geoapify_api_key_here
-     MONGODB_URI=your_mongodb_connection_string_here
-     ```
+High-performance, scalable, and secure architecture.
 
-## Usage
+| Component | Technology | Description |
+| :--- | :--- | :--- |
+| **Backend** | **Python, FastAPI** | High-performance async API framework. |
+| **AI (LLM)** | **Google Gemini 1.5 Flash/Pro** | Natural Language Processing for chatbot, report analysis, and insights. |
+| **AI (Vision)** | **TensorFlow / Keras** | Convolutional Neural Networks for medical image classification. |
+| **Database** | **MongoDB** | NoSQL database for flexible patient records and medical data. |
+| **Frontend** | **HTML5, CSS3, JavaScript** | Responsive, accessible UI served via Jinja2 templates. |
+| **ML Ops** | **Hugging Face Spaces** | Cloud deployment and model hosting. |
+| **Services** | **Geoapify, SMTP** | Location services and Email notifications. |
+| **Security** | **PBKDF2 Hashing, JWT** | Robust authentication and secure session management. |
 
-1. Start the application:
-   ```bash
-   python app_main.py
-   ```
+## 🏗️ Installation & Local Setup
 
-2. Open your browser and navigate to:
-   ```
-   http://localhost:8000
-   ```
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/nihannihu/AI-Cancer-Care-Navigator.git
+    cd AI-Cancer-Care-Navigator
+    ```
 
-## Project Structure
+2.  **Set Up Virtual Environment**
+    ```bash
+    python -m venv venv
+    # Windows
+    venv\Scripts\activate
+    # Mac/Linux
+    source venv/bin/activate
+    ```
 
-```
-├── app_main.py          # Main application file
-├── ml/
-│   └── breast_cancer_cnn.h5  # Pre-trained AI model
-├── static/
-│   └── medical-theme.css     # Styling
-├── templates/
-│   ├── base.html        # Base template
-│   ├── index.html       # Home page
-│   ├── pcp.html         # Primary Care Provider interface
-│   ├── pcp_result.html  # PCP result display
-│   ├── oncologist.html  # Oncologist dashboard
-│   └── patient.html     # Patient portal
-├── .env                 # Environment variables (gitignored)
-├── .env.example         # Example environment variables
-└── requirements.txt     # Python dependencies
-```
+3.  **Install Dependencies**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Environment Variables
+4.  **Configure Environment**
+    Create a `.env` file (see `.env.example`) and add your keys:
+    ```env
+    GEMINI_API_KEY=your_key
+    MONGODB_URI=your_mongo_db
+    SMTP_PASS=your_app_password
+    ```
 
-- `GEOAPIFY_API_KEY`: API key for Geoapify geolocation services
-- `MONGODB_URI`: MongoDB connection string (optional)
-- `APP_HOST`: Host address (default: 0.0.0.0)
-- `APP_PORT`: Port number (default: 8000)
-- `MODEL_PATH`: Path to AI model (default: ml/breast_cancer_cnn.h5)
+5.  **Run the Application**
+    ```bash
+    python app_main.py
+    ```
+    Visit `http://localhost:8000` in your browser.
 
-## Key Features Explained
+## 📸 Screenshots
 
-### Emergency Services
-Click the "🚨 Emergency" button to:
-- Access your real-time location
-- Find the 5 nearest hospitals
-- View distances and estimated travel times
-- See hospital contact information
+*(Add screenshots of your Dashboard, AI Analysis, and Chatbot here)*
 
-### AI Triage System
-- Upload mammography images for AI analysis
-- Get risk assessment scores (0.000 to 1.000)
-- Automatic forwarding of high-risk cases to oncologists
-- Visual preview of uploaded scans (properly sized)
+## 🤝 Contributing
 
-### Tele-Oncology Hub
-- View AI-flagged cases in a prioritized worklist
-- Access case details and patient information
-- Monitor case status and history
+Contributions are welcome! Please fork the repository and submit a Pull Request.
 
-### Patient Portal
-- Daily symptom check-in system
-- View personal health information
-- Track case status
+## 📜 License
 
-## Security
-
-- All sensitive configuration stored in `.env` file
-- `.env` file is gitignored for security
-- Use `.env.example` as a template for new deployments
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a pull request
-
-## License
-
-This project is for educational and demonstration purposes.
-
-## Acknowledgments
-
-- Developed for the Indian HealthTech Hackathon 2025
-- Uses TensorFlow for AI model implementation
-- Geolocation services powered by Geoapify
+MIT License. Built for the **Indian HealthTech Hackathon 2025**.
