@@ -249,6 +249,10 @@ async def oncologist_clear() -> RedirectResponse:
     return RedirectResponse(url="/oncologist", status_code=303)
 
 
+@app.get("/model-validation", response_class=HTMLResponse)
+async def model_validation_page(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse("model_validation.html", {"request": request})
+
 # -------------------- Patient: Symptom Monitoring (The "Cure" support) ------
 
 PATIENT_SYMPTOMS: List[dict] = []

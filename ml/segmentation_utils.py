@@ -81,6 +81,56 @@ class SegmentationModel:
             print(f"Prediction error: {e}")
             return None, str(e)
 
+    def generate_comparison(self, image_bytes):
+        """
+        Generates a side-by-side comparison: Original | Mask Overlay | Binary Mask
+        Useful for the 'Hard Verification' artifacts.
+        """
+        if self.model is None:
+            return None
+            
+        try:
+             # 1. Preprocess
+            nparr = np.frombuffer(image_bytes, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            original_shape = img.shape[:2]
+            
+            x = cv2.resize(img, (self.img_size, self.img_size)) / 255.0
+            x = np.expand_dims(x, axis=0)
+
+            # 2. Predict
+            pred_mask = self.model.predict(x)[0]
+            pred_mask = (pred_mask > 0.5).astype(np.uint8) * 255
+            pred_mask = cv2.resize(pred_mask, (original_shape[1], original_shape[0]))
+            
+            # 3. Create Visualize: Vertical stack or Horizontal? Let's do Horizontal
+            # Original
+            vis_img = img.copy()
+            
+            # Overlay (Green)
+            colored_mask = np.zeros_like(img)
+            colored_mask[:, :, 1] = pred_mask
+            vis_overlay = cv2.addWeighted(img, 1, colored_mask, 0.4, 0)
+            
+            # Binary Mask (White on Black)
+            vis_mask = cv2.cvtColor(pred_mask, cv2.COLOR_GRAY2BGR)
+            
+            # Stack: Original | Overlay | Mask
+            # Ensure heights match if needed, but they are from same source
+            combined = np.hstack((vis_img, vis_overlay, vis_mask))
+            
+            # Optimize size if too large
+            if combined.shape[1] > 1200:
+                scale = 1200 / combined.shape[1]
+                combined = cv2.resize(combined, (0,0), fx=scale, fy=scale)
+            
+            _, buffer = cv2.imencode('.jpg', combined)
+            return base64.b64encode(buffer).decode('utf-8')
+            
+        except Exception as e:
+            print(f"Comparison gen error: {e}")
+            return None
+
 # Global instance
 segmentor = None
 
