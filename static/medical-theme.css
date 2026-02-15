@@ -1320,3 +1320,23 @@ input[type="range"] {
 .btn.loading span {
   visibility: hidden;
 }
+
+/* Loading State for Buttons */
+.btn.loading {
+  position: relative;
+  pointer-events: none;
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 0.5rem;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 1s ease-in-out infinite;
+  vertical-align: middle;
+}

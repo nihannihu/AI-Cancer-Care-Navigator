@@ -31,8 +31,8 @@
 
         <div class="form-group">
           <label for="patient_email">Patient Email</label>
-          <input type="email" id="patient_email" name="patient_email" placeholder="patient@example.com" required 
-                 style="padding: 1rem; font-size: 1.1rem; border-radius: 8px;" />
+          <input type="email" id="patient_email" name="patient_email" placeholder="patient@example.com" required
+            style="padding: 1rem; font-size: 1.1rem; border-radius: 8px;" />
           <p class="surface-body" style="margin-top: 0.5rem; font-size: 0.9rem; color: #94a3b8;">
             Patient will use this email to register and view their results
           </p>
@@ -40,8 +40,8 @@
 
         <div class="form-group">
           <label for="patient_phone">Patient Phone</label>
-          <input type="tel" id="patient_phone" name="patient_phone" placeholder="+91-9876543210" required 
-                 style="padding: 1rem; font-size: 1.1rem; border-radius: 8px;" />
+          <input type="tel" id="patient_phone" name="patient_phone" placeholder="+91-9876543210" required
+            style="padding: 1rem; font-size: 1.1rem; border-radius: 8px;" />
           <p class="surface-body" style="margin-top: 0.5rem; font-size: 0.9rem; color: #94a3b8;">
             For appointment notifications
           </p>
@@ -94,9 +94,18 @@
 {% endblock %}
 
 <script>
-// Add loading animation to the upload form
-document.querySelector('form[action="/pcp/upload"]').addEventListener('submit', function() {
-  const btn = document.getElementById('upload-btn');
-  btn.classList.add('loading');
-});
+  // Enhanced loading animation for the upload form
+  document.querySelector('form[action="/pcp/upload"]').addEventListener('submit', function (e) {
+    const btn = document.getElementById('upload-btn');
+
+    // Prevent double submission
+    if (btn.classList.contains('loading')) {
+      e.preventDefault();
+      return;
+    }
+
+    // Change button state
+    btn.classList.add('loading');
+    btn.innerHTML = '<div class="loading-spinner"></div> Analyzing...';
+  });
 </script>
