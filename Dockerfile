@@ -4,9 +4,6 @@ FROM python:3.9-slim
 # Set working directory
 WORKDIR /app
 
-# Copy requirements file
-COPY requirements.txt .
-
 # Install system dependencies required for building Python packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -15,8 +12,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip to ensure we get binaries
+RUN pip install --no-cache-dir --upgrade pip
+
+# Copy core requirements first (cache hit likely)
+COPY requirements-core.txt .
+RUN pip install --no-cache-dir -r requirements-core.txt
+
+# Copy ML requirements (heavy, changed less often)
+COPY requirements-ml.txt .
+RUN pip install --no-cache-dir -r requirements-ml.txt
 
 # Copy the rest of the application
 COPY . .
