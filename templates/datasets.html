@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Datasets - Onco-Navigator AI{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h1 class="display-4 text-primary fw-bold">Training Datasets</h1>
+        <p class="lead text-muted">High-quality medical imaging data powering our AI models</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow mb-5">
+            <div class="card-header bg-dark text-white">
+                <h3 class="mb-0">Breast Ultrasound Images Dataset (BUSI)</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <img src="https://media.springernature.com/lw685/springer-static/image/art%3A10.1038%2Fs41597-024-03285-8/MediaObjects/41597_2024_3285_Fig1_HTML.png"
+                            class="img-fluid rounded mb-3" alt="BUSI Dataset Samples"
+                            onerror="this.src='https://via.placeholder.com/300x200?text=BUSI+Dataset+Sample'">
+                    </div>
+                    <div class="col-md-8">
+                        <p class="card-text">
+                            The <strong>Breast Ultrasound Images (BUSI)</strong> dataset is the primary source for
+                            training our
+                            Classification (DenseNet121) and Segmentation (Attention U-Net) models.
+                        </p>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item"><strong>Source:</strong> Collected from 600 female patients
+                                (ages 25-75).</li>
+                            <li class="list-group-item"><strong>Total Images:</strong> 780 ultrasound images
+                                (Pre-augmentation).</li>
+                            <li class="list-group-item"><strong>Classes:</strong> Normal, Benign, and Malignant.</li>
+                            <li class="list-group-item"><strong>Annotations:</strong> Pixel-level ground truth masks for
+                                all images.</li>
+                            <li class="list-group-item"><strong>Equipment:</strong> LOGIQ E9 ultrasound system and LOGIQ
+                                E9 Agile.</li>
+                        </ul>
+                        <div class="alert alert-info">
+                            <strong>Training Enhancement:</strong> We applied rigorous data augmentation (flipping,
+                            rotation, contrast adjustment)
+                            to expand the effective dataset size to over **2,000 samples**, ensuring robust model
+                            generalization.
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h4>Class Distribution</h4>
+                <div class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: 17%" aria-valuenow="17"
+                        aria-valuemin="0" aria-valuemax="100">Normal (133)</div>
+                    <div class="progress-bar bg-warning text-dark" role="progressbar" style="width: 56%"
+                        aria-valuenow="56" aria-valuemin="0" aria-valuemax="100">Benign (437)</div>
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: 27%" aria-valuenow="27"
+                        aria-valuemin="0" aria-valuemax="100">Malignant (210)</div>
+                </div>
+                <small class="text-muted">Distribution of original images before augmentation.</small>
+            </div>
+            <div class="card-footer text-muted">
+                Reference: Al-Dhabyani W, Gomaa M, Khaled H, Fahmy A. Dataset of breast ultrasound images. Data in
+                Brief. 2020 Feb;28:104863.
+            </div>
+        </div>
+
+        <div class="card shadow mb-5">
+            <div class="card-header bg-secondary text-white">
+                <h3 class="mb-0">MIMIC-III (Clinical Data)</h3>
+            </div>
+            <div class="card-body">
+                <p>
+                    Used for our <strong>Patient Survival & Risk Prediction</strong> models (Random Forest).
+                </p>
+                <ul>
+                    <li><strong>Description:</strong> Large-scale de-identified health-related data associated with over
+                        40,000 patients.</li>
+                    <li><strong>Features Used:</strong> Demographics, Comorbidities, Vital Signs, Lab Results.</li>
+                    <li><strong>Purpose:</strong> Predicting 5-year survival rates and recurrence risks based on
+                        clinical history.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

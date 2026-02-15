@@ -45,7 +45,10 @@ csv/
 jpeg/
 *.jpg
 *.jpeg
+*.jpeg
 *.png
+!static/**/*.png
+!static/**/*.jpg
 *.csv
 
 # Notebook checkpoints

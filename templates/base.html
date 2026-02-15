@@ -28,8 +28,8 @@
           <a href="/pcp" class="nav-link">PCP Triage</a>
           <a href="/oncologist" class="nav-link">Oncologist Hub</a>
           <a href="/ai-diagnostics" class="nav-link">AI Diagnostics</a>
-          <a href="/datasets" class="nav-link">Datasets</a>
-          <a href="/model-validation" class="nav-link" style="border-bottom: 2px solid #22c55e;">✅ Validation</a>
+          <a href="/model-validation" class="nav-link" style="border-bottom: 2px solid #22c55e;">✅ Validation &
+            Datasets</a>
           <a href="/patient" class="nav-link nav-link-patient">Patient App</a>
           <button id="emergency-button" class="btn nav-link nav-link-primary emergency-button">🚨 Emergency</button>
           <button id="ambulance-button" class="btn nav-link nav-link-primary ambulance-button"
@@ -472,6 +472,7 @@
       // Otherwise allow default behavior (target="_blank" handles it)
     });
   </script>
+  {% block scripts %}{% endblock %}
 </body>
 
 </html>

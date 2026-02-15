@@ -22,6 +22,7 @@ RUN pip install --no-cache-dir -r requirements-core.txt
 # Copy ML requirements (heavy, changed less often)
 COPY requirements-ml.txt .
 RUN pip install --no-cache-dir -r requirements-ml.txt
+RUN pip install matplotlib
 
 # Copy the rest of the application
 COPY . .

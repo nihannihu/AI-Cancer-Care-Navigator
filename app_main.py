@@ -98,6 +98,25 @@ SCAN_CASES: List[ScanCase] = []
 async def index(request: Request) -> HTMLResponse:
     return templates.TemplateResponse("index.html", {"request": request})
 
+@app.get("/model-validation", response_class=HTMLResponse)
+async def model_validation(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse("model_validation.html", {"request": request})
+
+@app.get("/api/model-info")
+async def get_model_info():
+    """Return information about the currently loaded models."""
+    return {
+        "classification_model": {
+            "loaded": model is not None,
+            "type": "DenseNet121 (High Accuracy)" if model and getattr(model, "is_new_model", False) else "Legacy/Basic",
+            "path": str(model.model_path) if model else None
+        },
+        "segmentation_model": {
+            "loaded": segmentor is not None and segmentor.model is not None,
+            "path": str(segmentor.model_path) if segmentor else None
+        }
+    }
+
 
 # -------------------- PCP: AI-Assisted Triage (The "Scan") --------------------
 
