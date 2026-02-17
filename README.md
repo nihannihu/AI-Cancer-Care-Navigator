@@ -156,4 +156,4 @@ This project is for educational and demonstration purposes.
 - Developed for the Indian HealthTech Hackathon 2025
 - Uses TensorFlow for AI model implementation
 - Geolocation services powered by Geoapify
-<!-- Rebuild Trigger: Deployment Sync -->
+<!-- Rebuild Trigger: Force Update 2026-02-17 19:18 -->
