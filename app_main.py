@@ -122,7 +122,7 @@ async def get_model_info():
 
 @app.get("/pcp", response_class=HTMLResponse)
 async def pcp_dashboard(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("pcp_dashboard.html", {"request": request})
+    return templates.TemplateResponse("pcp_dashboard_v2.html", {"request": request})
 
 
 @app.post("/pcp/upload", response_class=HTMLResponse)
@@ -131,9 +131,71 @@ async def pcp_upload(
     patient_name: str = Form(...),
     patient_email: str = Form(...),
     patient_phone: str = Form(...),
+    modality: str = Form(...),
     file: UploadFile = File(...),
 ) -> HTMLResponse:
-    # Check if model is available
+    # SECURITY: File Validation
+    # 1. Check size (Limit to 10MB)
+    MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+    file.file.seek(0, 2)
+    file_size = file.file.tell()
+    file.file.seek(0)
+    
+    if file_size > MAX_FILE_SIZE:
+        return templates.TemplateResponse(
+            "pcp_result.html", {
+                "request": request,
+                "patient_name": patient_name,
+                "risk_label": "ERROR",
+                "risk_score": 0.0,
+                "case_id": 0,
+                "image_url": None,
+                "error": f"File too large ({file_size/1024/1024:.2f}MB). Max limit is 10MB."
+            }
+        )
+
+    # 2. Check extension
+    allowed_extensions = {".jpg", ".jpeg", ".png"}
+    file_ext = Path(file.filename or "").suffix.lower()
+    if file_ext not in allowed_extensions:
+        return templates.TemplateResponse(
+            "pcp_result.html", {
+                "request": request,
+                "patient_name": patient_name,
+                "risk_label": "ERROR",
+                "risk_score": 0.0,
+                "case_id": 0,
+                "image_url": None,
+                "error": f"Invalid file type '{file_ext}'. Only JPEG and PNG are allowed."
+            }
+        )
+
+    # 3. Check MIME type / Magic Bytes (Basic)
+    # Read first 1024 bytes for validation
+    header_data = await file.read(1024)
+    await file.seek(0) # Reset cursor
+    
+    # Simple magic byte check
+    is_valid_image = False
+    if header_data.startswith(b'\xff\xd8'): # JPEG
+        is_valid_image = True
+    elif header_data.startswith(b'\x89PNG\r\n\x1a\n'): # PNG
+        is_valid_image = True
+        
+    if not is_valid_image:
+         return templates.TemplateResponse(
+            "pcp_result.html", {
+                "request": request,
+                "patient_name": patient_name,
+                "risk_label": "ERROR",
+                "risk_score": 0.0,
+                "case_id": 0,
+                "image_url": None,
+                "error": "Corrupted or invalid image file. Please upload a valid scan."
+            }
+        )
+            
+    # Check if model is available after validation passes
     if model is None:
         return templates.TemplateResponse(
             "pcp_result.html",
@@ -156,8 +218,12 @@ async def pcp_upload(
     case_id = len(SCAN_CASES) + 1
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Run segmentation
-    segmentation_overlay, seg_error = segmentor.predict_mask(data)
+    # Run segmentation based on modality
+    segmentation_overlay = None
+    seg_error = None
+    
+    if modality == 'ultrasound':
+        segmentation_overlay, seg_error = segmentor.predict_mask(data)
 
     # Persist uploaded image so it can be previewed in the UI
     uploads_dir = UPLOADS_DIR
@@ -214,7 +280,8 @@ async def pcp_upload(
             "timestamp": timestamp,
             "image_url": image_url,
             "cancer_stage": stage,
-            "segmentation_overlay": segmentation_overlay, # Pass to template
+            "segmentation_overlay": segmentation_overlay,
+            "modality": modality,
         },
     )
 

@@ -48,6 +48,19 @@
         </div>
 
         <div class="form-group">
+          <label>Select Imaging Modality</label>
+          <div class="modality-selector" style="display: flex; gap: 1rem; margin-top: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary modality-btn" onclick="selectModality('xray')">
+              🩻 X-Ray / MRI
+            </button>
+            <button type="button" class="btn btn-secondary modality-btn" onclick="selectModality('ultrasound')">
+              🔍 Ultrasound
+            </button>
+          </div>
+          <input type="hidden" id="modality" name="modality" required>
+        </div>
+
+        <div class="form-group" id="file-upload-group" style="display: none; transition: all 0.3s ease;">
           <label for="file">Scan Image (JPEG/PNG)</label>
           <input type="file" id="file" name="file" accept="image/jpeg,image/png" required />
           <p class="surface-body" style="margin-top: 0.75rem; font-size: 0.95rem;">
@@ -57,10 +70,11 @@
       </div>
 
       <div class="form-footer">
-        <button type="submit" class="btn btn-primary" id="upload-btn">
+        <button type="submit" class="btn btn-primary" id="upload-btn" disabled
+          style="opacity: 0.5; cursor: not-allowed;">
           <span>Upload & Analyze</span>
         </button>
-        <button type="reset" class="btn btn-secondary">Reset Form</button>
+        <button type="reset" class="btn btn-secondary" onclick="resetModality()">Reset Form</button>
       </div>
     </form>
   </section>
@@ -93,19 +107,71 @@
 </div>
 {% endblock %}
 
+{% block scripts %}
 <script>
-  // Enhanced loading animation for the upload form
-  document.querySelector('form[action="/pcp/upload"]').addEventListener('submit', function (e) {
-    const btn = document.getElementById('upload-btn');
+  // Modality Selection Logic
+  function selectModality(mode) {
+    // Set hidden input
+    document.getElementById('modality').value = mode;
 
-    // Prevent double submission
-    if (btn.classList.contains('loading')) {
-      e.preventDefault();
-      return;
+    // Update buttons
+    document.querySelectorAll('.modality-btn').forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-secondary');
+      btn.style.border = '1px solid var(--medical-border-strong)';
+    });
+
+    // Highlight selected
+    // Note: 'event' is deprecated/non-standard in some contexts, safer to pass 'this' or use event listener
+    // But for inline onclick, event is usually available. Let's make it robust.
+    const selectedBtn = event.target.closest('button');
+    if (selectedBtn) {
+      selectedBtn.classList.remove('btn-secondary');
+      selectedBtn.classList.add('btn-primary');
+      selectedBtn.style.border = '2px solid white';
     }
 
-    // Change button state
-    btn.classList.add('loading');
-    btn.innerHTML = '<div class="loading-spinner"></div> Analyzing...';
-  });
+    // Show upload field
+    const fileGroup = document.getElementById('file-upload-group');
+    fileGroup.style.display = 'block';
+    fileGroup.classList.add('fade-in-up');
+
+    // Enable submit
+    const submitBtn = document.getElementById('upload-btn');
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = '1';
+    submitBtn.style.cursor = 'pointer';
+  }
+
+  function resetModality() {
+    document.getElementById('file-upload-group').style.display = 'none';
+    const submitBtn = document.getElementById('upload-btn');
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.5';
+    submitBtn.style.cursor = 'not-allowed';
+
+    document.querySelectorAll('.modality-btn').forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-secondary');
+    });
+  }
+
+  // Enhanced loading animation for the upload form
+  const form = document.querySelector('form[action="/pcp/upload"]');
+  if (form) {
+    form.addEventListener('submit', function (e) {
+      const btn = document.getElementById('upload-btn');
+
+      // Prevent double submission
+      if (btn.classList.contains('loading')) {
+        e.preventDefault();
+        return;
+      }
+
+      // Change button state
+      btn.classList.add('loading');
+      btn.innerHTML = '<div class="loading-spinner"></div> Analyzing...';
+    });
+  }
 </script>
+{% endblock %}
