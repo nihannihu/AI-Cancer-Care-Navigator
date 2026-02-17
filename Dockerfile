@@ -25,6 +25,7 @@ RUN pip install --no-cache-dir -r requirements-ml.txt
 RUN pip install matplotlib
 
 # Copy the rest of the application
+ENV FORCE_REBUILD=2026-02-17-v2
 COPY . .
 
 # Expose port 7860 for Hugging Face Spaces
