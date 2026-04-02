@@ -40,14 +40,26 @@ class BreastCancerModel:
             self.model = None
 
     def preprocess_bytes(self, data: bytes) -> np.ndarray:
-        if self.is_new_model:
-            # DenseNet Preprocessing: RGB, 224x224, default densenet preprocessing
-            img = Image.open(BytesIO(data)).convert("RGB")
-            img = img.resize(IMG_SIZE)
-            arr = np.array(img, dtype=np.float32)
-            # Use tf.keras.applications.densenet.preprocess_input logic (scale to 0-1 or -1 to 1)
-            # To avoid strict dependency on the specific function if not available, we can use standard:
-            # DenseNet standard is often 1/255. But let's use the TF util if possible, or standard.
+        try:
+            if self.is_new_model:
+                # DenseNet Preprocessing: RGB, 224x224, default densenet preprocessing
+                img = Image.open(BytesIO(data)).convert("RGB")
+                img = img.resize(IMG_SIZE)
+                arr = np.array(img, dtype=np.float32)
+                # Use tf.keras.applications.densenet.preprocess_input logic
+                arr = tf.keras.applications.densenet.preprocess_input(arr)
+                return np.expand_dims(arr, axis=0)
+            else:
+                # Legacy: Grayscale, 28x28
+                img = Image.open(BytesIO(data)).convert("L")
+                img = img.resize((28, 28))
+                arr = np.array(img, dtype=np.float32)
+                arr = arr / 255.0
+                arr = np.expand_dims(arr, axis=-1)
+                return np.expand_dims(arr, axis=0)
+        except Exception as e:
+            print(f"Error processing image bytes: {e}")
+            raise ValueError(f"Image processing failed: {str(e)}")
             # safe fallback:
             arr = tf.keras.applications.densenet.preprocess_input(arr)
             arr = np.expand_dims(arr, axis=0) # (1, 224, 224, 3)
