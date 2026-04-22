@@ -8,7 +8,7 @@ sys.path.insert(0, str(project_root))
 
 # Set up environment variables
 os.environ['APP_URL'] = 'http://localhost:8000'
-os.environ['MONGODB_URI'] = 'mongodb+srv://nihan:Killer888beats@nihan.3jzvm5.mongodb.net/climate-sustainability?retryWrites=true&w=majority&appName=nihan'
+os.environ['MONGODB_URI'] = 
 
 def test_qr_code_generation():
     """Test QR code generation directly"""
